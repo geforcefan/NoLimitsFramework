@@ -1,0 +1,121 @@
+package com.nolimitsframework.spline;
+
+import nlvm.math3d.*;
+import nlvm.util.*;
+
+public class SplineBezier implements Spline {
+	private Vector points = new Vector();
+	
+	private float length = 0.0f;
+	private Vector lenghtVectors = new Vector();
+	
+	
+    public float q(float t, float p1, float p2, float p3, float p4) {
+		float t2 = t*t;
+		float t3 = t*t*t;
+    	return ((-t3+2*t2-t)*(p1)+(3*t3-5*t2+2)*(p2)+(-3*t3+4*t2+t)*(p3)+(t3-t2)*(p4))/2;
+    }
+    
+    public Vector3f q(float t, Vector3f p1, Vector3f p2, Vector3f p3, Vector3f p4) {
+        return new Vector3f(q(t, p1.x, p2.x, p3.x, p4.x),
+        					q(t, p1.y, p2.y, p3.y, p4.y),
+        				    q(t, p1.z, p2.z, p3.z, p4.z));
+    }
+    
+	public float getOffsetByLength(float offset) {
+		return offset / length;
+	}
+	
+	public float getOffsetByPoint(int point) {
+		//if(point == 0) return 0.0f;
+		//if(point == points.size() - 1) return length;
+		
+		float ltotal = 0.0f;
+    	for(int i=0; i < Math.min(lenghtVectors.size(), point); i++) {
+    		Vector3f lvector = (Vector3f) lenghtVectors.elementAt(i);
+    		ltotal += lvector.length();
+    	}
+    	
+    	System.out.println(ltotal);
+    	
+		return getOffsetByLength(ltotal);
+	}
+	
+    public Vector3f getPosition(float t) {
+    	float loffset = (length * t) / 1.0f;
+    	float ltotal = 0.0f;
+    	
+    	if(t == 0.0f) return getPosition(t, 0);
+    	
+    	for(int i=0; i < lenghtVectors.size(); i++) {
+    		Vector3f lvector = (Vector3f) lenghtVectors.elementAt(i);
+    		
+    		if(ltotal + lvector.x > loffset) {
+    			float lcurr = (loffset - ltotal);
+    			float nt = lcurr / lvector.x;
+    			
+    			return getPosition(nt, i);
+    		}
+    		
+    		ltotal += lvector.x;
+    	}
+    	
+		return getPosition(t, lenghtVectors.size() - 1);
+    }
+    
+    public Vector3f getPosition(float t, int segment) {
+    	if(points.size() > segment + 1) {
+    		Vector3f p0 = segment == 0 ? (Vector3f)points.elementAt(segment) : (Vector3f)points.elementAt(segment - 1);
+    		Vector3f p1 = (Vector3f)points.elementAt(segment);
+    		Vector3f p2 = (Vector3f)points.elementAt(segment + 1);
+    		Vector3f p3 = (segment+2==points.size()) ? (Vector3f)points.elementAt(segment + 1) : (Vector3f)points.elementAt(segment + 2);
+    		
+    		Vector3f p4 = q(t, p0, p1, p2, p3);
+            
+    		return p4;
+    	} else {
+			return new Vector3f(0.0f, 0.0f, 0.0f);
+		}
+    }
+    
+    public int getSegments() {
+    	if(points.size() < 3) return 0;
+    	else return points.size() - 1;
+    }
+    
+    public float getLength() {
+    	return length;
+    }
+    
+    public float getLength(int segment) {
+    	if(points.size() >= 3) {
+    		float l=0.0f;
+    		for(float t=0.0f; t <= 1.0f; t+=1.0f/255.0f) {
+    			Vector3f p1 = getPosition(t, segment);
+    			Vector3f p2 = getPosition(t+0.01f, segment);
+    			Vector3f p3 = p2.dup();
+    			p3.sub(p1);
+    			l += p3.length();
+    		}
+    		Vector3f p4 = new Vector3f(l, 0.0f, 0.0f);
+			
+			lenghtVectors.setSize(segment + 1);
+			lenghtVectors.setElementAt(p4, segment);
+    		return l;
+    	} else {
+    		return 0.0f;
+    	}
+    }
+    
+    public void addPoint(Vector3f point) {
+    	points.addElement(point);
+    	
+    	int numSegments = getSegments();
+    	
+    	if(getSegments() > 0) {
+    		if(numSegments == 2) length += getLength(0);
+    		length += getLength(numSegments-1);
+    	}
+    	
+    }
+}

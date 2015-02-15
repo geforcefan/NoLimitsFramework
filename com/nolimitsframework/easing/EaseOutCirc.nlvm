@@ -1,0 +1,7 @@
+package com.nolimitsframework.easing;
+
+public class EaseOutCirc extends Easing {
+    public double getValue(double t,double b, double c, double d) {
+        return c * Math.sqrt(1 - (t=t/d-1)*t) + b;
+    }
+}

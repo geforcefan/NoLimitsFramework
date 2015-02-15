@@ -1,0 +1,15 @@
+package com.nolimitsframework.constraints;
+
+import com.nolimitsframework.transition.*;
+import com.nolimitsframework.*;
+
+public class Constraint extends Transition implements Process {
+	protected Transition obj = null;
+    
+    public void init(Transition _obj) {
+    	obj = _obj;
+    	if(obj != null) Framework.setProcess(this);
+    }
+    
+	public void onChange() {}
+}

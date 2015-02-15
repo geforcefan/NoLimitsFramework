@@ -1,0 +1,33 @@
+package com.nolimitsframework.animation;
+
+import com.nolimitsframework.trigger.*;
+import nlvm.util.*;
+
+public class Timeline extends Triggerable {
+	private Vector animations = new Vector();
+	
+	public void addAnimation(Animation animation) {
+		animations.addElement(animation);
+	}
+	
+    public void setLabel(String label, float startTime, float endTime) {
+		for(int i=0; i < animations.size(); i++) {
+			Animation anim = (Animation)animations.elementAt(i);
+			anim.setLabel(label, startTime, endTime);
+		}
+    }
+	
+	public void start() {
+		for(int i=0; i < animations.size(); i++) {
+			Animation anim = (Animation)animations.elementAt(i);
+			anim.start();
+		}
+	}
+	
+	public void start(String label) {
+		for(int i=0; i < animations.size(); i++) {
+			Animation anim = (Animation)animations.elementAt(i);
+			anim.start(label);
+		}
+	}
+}

@@ -1,0 +1,105 @@
+package com.nolimitsframework.spline;
+
+import nlvm.math3d.*;
+import nlvm.util.*;
+
+public class SplineLinear implements Spline {
+	private Vector points = new Vector();
+	
+	private float length = 0.0f;
+	private Vector lenghtVectors = new Vector();
+	
+	public float getOffsetByLength(float offset) {
+		return offset / length;
+	}
+	
+	public float getOffsetByPoint(int point) {
+		//if(point == 0) return 0.0f;
+		//if(point == points.size() - 1) return length;
+		
+		float ltotal = 0.0f;
+    	for(int i=0; i < Math.min(lenghtVectors.size(), point); i++) {
+    		Vector3f lvector = (Vector3f) lenghtVectors.elementAt(i);
+    		ltotal += lvector.length();
+    	}
+    	
+    	System.out.println(ltotal);
+    	
+		return getOffsetByLength(ltotal);
+	}
+	
+    public Vector3f getPosition(float t) {
+    	float loffset = (length * t) / 1.0f;
+    	float ltotal = 0.0f;
+    	
+    	if(t == 0.0f) return getPosition(t, 0);
+    	
+    	for(int i=0; i < lenghtVectors.size(); i++) {
+    		Vector3f lvector = (Vector3f) lenghtVectors.elementAt(i);
+    		
+    		if(ltotal + lvector.length() > loffset) {
+    			float lcurr = (loffset - ltotal);
+    			float nt = lcurr / lvector.length();
+    			
+    			return getPosition(nt, i);
+    		}
+    		
+    		ltotal += lvector.length();
+    	}
+    	
+		return getPosition(t, lenghtVectors.size() - 1);
+    }
+    
+    public Vector3f getPosition(float t, int segment) {
+    	if(points.size() > segment + 1) {
+    		Vector3f p1 = (Vector3f)points.elementAt(segment);
+    		Vector3f p2 = (Vector3f)points.elementAt(segment + 1);
+    		
+    		Vector3f p3 = new Vector3f(0.0f, 0.0f, 0.0f);
+    		p3.x = p1.x * (1.0f-t) + p2.x * t;
+    		p3.y = p1.y * (1.0f-t) + p2.y * t;
+    		p3.z = p1.z * (1.0f-t) + p2.z * t;
+    		
+    		return p3;
+    	} else {
+			return new Vector3f(0.0f, 0.0f, 0.0f);
+		}
+    }
+    
+    public int getSegments() {
+    	if(points.size() < 1) return 0;
+    	else return points.size() - 1;
+    }
+    
+    public float getLength() {
+    	return length;
+    }
+    
+    public float getLength(int segment) {
+    	if(points.size() > segment + 1) {
+    		Vector3f p1 = (Vector3f)points.elementAt(segment);
+    		Vector3f p2 = (Vector3f)points.elementAt(segment + 1);
+    		Vector3f p3 = p2.dup();
+    		
+			p3.sub(p1);
+			
+			lenghtVectors.setSize(segment + 1);
+			lenghtVectors.setElementAt(p3, segment);
+			
+    		return p3.length();
+    	} else {
+    		return 0.0f;
+    	}
+    }
+    
+    public void addPoint(Vector3f point) {
+    	points.addElement(point);
+    	
+    	int numSegments = getSegments();
+    	
+    	if(getSegments() > 0) {
+    		length += getLength(numSegments-1);
+    	}
+    	
+    }
+}

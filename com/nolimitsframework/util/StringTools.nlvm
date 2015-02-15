@@ -1,0 +1,33 @@
+package com.nolimitsframework.util;
+import nlvm.util.*;
+
+public class StringTools {
+    static public Vector split(char split, String input) {
+        Vector matches = new Vector();
+        matches.addElement(new StringBuilder());
+        
+        for(int i=0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if(c == split) {
+                matches.addElement(new StringBuilder());
+            } else {
+                StringBuilder cs = (StringBuilder)matches.elementAt(matches.size()-1);
+                cs.append(c);
+            }
+        }
+        
+        return matches;
+    }
+    
+    static public String trim(String in) {
+        String str = in;
+        
+        while (str.charAt(0) == ' ') {
+            str = str.substring(1, str.length());
+        }
+        while (str.substring(str.length() - 1, str.length()).equals(" ")) {
+            str = str.substring(0, str.length() - 1);
+        }
+        return str;
+    }
+}

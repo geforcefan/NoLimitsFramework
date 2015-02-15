@@ -1,0 +1,94 @@
+package com.nolimitsframework.constraints;
+
+import com.nolimitsframework.transition.*;
+import com.nolimitsframework.util.*;
+import com.nolimitsframework.*;
+
+import nlvm.math3d.*;
+
+public class LookAt extends Constraint implements Process  {
+    static final public int PROPERTY_POSITION = 0;
+    static final public int PROPERTY_POSITION_X = 10;
+    static final public int PROPERTY_POSITION_Y = 11;
+    static final public int PROPERTY_POSITION_Z = 12; 
+    
+	private Vector3f axis = new Vector3f(0.0f, 0.0f, 1.0f);
+	
+	private Transition lookatObj = null;
+	private Vector3f lookatPos = new Vector3f(0.0f, 0.0f, 0.0f);;
+	
+	public void onChange() {
+		Vector3f pos2 = lookatPos;
+		
+		if(lookatObj != null) {
+			pos2 = new Vector3f(lookatObj.getProperty(PROPERTY_POSITION_X),
+								lookatObj.getProperty(PROPERTY_POSITION_Y),
+								lookatObj.getProperty(PROPERTY_POSITION_Z));
+		}
+		
+		Vector3f pos = new Vector3f(obj.getProperty(PROPERTY_POSITION_X),
+									obj.getProperty(PROPERTY_POSITION_Y),
+									obj.getProperty(PROPERTY_POSITION_Z));
+									
+    	Vector3f normal = new Vector3f();
+    	normal.x = pos2.x - pos.x;
+        normal.y = pos2.y - pos.y;
+       	normal.z = pos2.z - pos.z;
+	 	normal.normalize();
+        		
+        Vector3f up = new Vector3f(0.0f, 1.0f, 0.0f);
+    	Vector3f upAxis = MathTools.cross(up, normal);
+        upAxis.normalize();
+       	float upAngle = MathTools.angle(up, normal);	
+        		
+        Vector3f side = new Vector3f(0.0f, 0.0f, 1.0f);
+    	Vector3f sideAxis = MathTools.cross(side, upAxis);
+    		
+    	float len = (float)Math.sqrt(sideAxis.x * sideAxis.x + sideAxis.y * sideAxis.y);
+		if(len == 0.0f) {
+			sideAxis.x = 0.0f;
+			sideAxis.y = -1.0f;
+			sideAxis.z = 0.0f;
+		}
+    	
+        sideAxis.normalize();
+       	float sideAngle = MathTools.angle(side, upAxis);
+        		
+        Matrix4x4f t = MathTools.initMatrix(1.0f, 0.0f, 0.0f, pos.x,
+        							  		0.0f, 1.0f, 0.0f, pos.y,
+        							  		0.0f, 0.0f, 1.0f, pos.z,
+        							  		0.0f, 0.0f, 0.0f, 1.0f);
+        								  		
+        MathTools.rotate(t, (float)Math.toRadians((double)upAngle), upAxis.x, upAxis.y, upAxis.z);  
+        MathTools.rotate(t, (float)Math.toRadians((double)sideAngle), sideAxis.x, sideAxis.y, sideAxis.z);
+        MathTools.rotate(t, (float)Math.toRadians(-90.0), axis.x, axis.y, axis.z);
+        	
+        obj.setMatrix(t);
+	}
+	
+	public void LookAtInit(Transition _lookatObj, bool stateStatic) {
+        if(stateStatic == true) {
+			lookatPos = new Vector3f(_lookatObj.getProperty(PROPERTY_POSITION_X),
+									 _lookatObj.getProperty(PROPERTY_POSITION_Y),
+									 _lookatObj.getProperty(PROPERTY_POSITION_Z));
+		} else {
+			lookatObj = _lookatObj;
+			lookatObj.addConstraint(this);
+		}
+	}
+	
+	public LookAt(Transition _lookatObj, bool stateStatic) {
+        super();
+		LookAtInit(_lookatObj, stateStatic);
+	}
+	
+	public LookAt(Transition _lookatObj) {
+        super();
+		LookAtInit(_lookatObj, false);
+	}
+	
+	public LookAt(Vector3f _pos) {
+        super();
+        lookatPos = _pos;
+	}
+}

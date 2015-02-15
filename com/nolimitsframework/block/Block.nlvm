@@ -1,0 +1,97 @@
+package com.nolimitsframework.block;
+
+import nlvm.lang.String;
+
+public class Block {
+    public String name;
+    protected BlockManager mngr;
+    
+    protected com.nolimitscoaster.Block nativeBlock;
+    protected Block nextBlock;
+    
+    // Block states
+    public static final int STATE_BLOCK_FREE = 0;
+    public static final int STATE_BLOCK_APPROACHING = 1;
+    public static final int STATE_BLOCK_LEAVING = 2;
+    public static final int STATE_BLOCK_BEFORE_TRIGGER = 3;
+    public static final int STATE_BLOCK_BEHIND_TRIGGER = 4;
+    public static final int STATE_BLOCK_WAITING = 5;
+    public static final int STATE_BLOCK_WAIT_FOR_CLEAR = 6;
+    public static final int STATE_BLOCK_WAIT_FOR_ADVANCE = 7;
+    public static final int STATE_BLOCK_IN_STATION = 8;
+    public static final int STATE_BLOCK_APPROACHING_B = 9;
+    public static final int STATE_BLOCK_LEAVING_B = 10;
+    public static final int STATE_BLOCK_BEFORE_TRIGGER_B = 11;
+    
+    public static final int DIRECTION_LEFT = 0;
+    public static final int DIRECTION_RIGHT = 1;
+    
+    public void setNextBlock(Block b) {
+        nextBlock = b;
+    }
+    
+    public com.nolimitscoaster.Block getNativeBlock() {
+        return nativeBlock;
+    }
+    
+    public bool init(BlockManager _mngr) {
+        mngr = _mngr;
+        nativeBlock = mngr.coaster.getBlock(name);
+        
+        if(nativeBlock == null) {
+            System.err.println("Block '" + name + "' not found");
+            return false;
+        }
+        
+        registerBlockStates();
+        setInitialBlockState();
+        
+        nativeBlock.setAdvanceFwdVisible(true);
+        
+        return initChild();
+    }
+    
+    private void registerBlockStates() {
+        nativeBlock.registerState(STATE_BLOCK_FREE, "Free", com.nolimitscoaster.Block.LAMP_OFF);
+        nativeBlock.registerState(STATE_BLOCK_APPROACHING, "Approaching", com.nolimitscoaster.Block.LAMP_FLASHING);
+        nativeBlock.registerState(STATE_BLOCK_APPROACHING_B, "Approaching", com.nolimitscoaster.Block.LAMP_FLASHING);
+        nativeBlock.registerState(STATE_BLOCK_LEAVING, "Leaving", com.nolimitscoaster.Block.LAMP_ON);
+        nativeBlock.registerState(STATE_BLOCK_LEAVING_B, "Leaving", com.nolimitscoaster.Block.LAMP_ON);
+        nativeBlock.registerState(STATE_BLOCK_BEFORE_TRIGGER, "Before Trigger", com.nolimitscoaster.Block.LAMP_ON);
+        nativeBlock.registerState(STATE_BLOCK_BEFORE_TRIGGER_B, "Before Trigger", com.nolimitscoaster.Block.LAMP_ON);
+        nativeBlock.registerState(STATE_BLOCK_BEHIND_TRIGGER, "Behind Trigger", com.nolimitscoaster.Block.LAMP_ON);
+        nativeBlock.registerState(STATE_BLOCK_WAITING, "Waiting", com.nolimitscoaster.Block.LAMP_ON);
+        nativeBlock.registerState(STATE_BLOCK_WAIT_FOR_CLEAR, "Waiting for Clear Block", com.nolimitscoaster.Block.LAMP_ON);
+        nativeBlock.registerState(STATE_BLOCK_WAIT_FOR_ADVANCE, "Waiting for Advance", com.nolimitscoaster.Block.LAMP_ON);
+        nativeBlock.registerState(STATE_BLOCK_IN_STATION, "In Station", com.nolimitscoaster.Block.LAMP_ON);
+    }
+    
+    public void setInitialBlockState() {
+        if (nativeBlock.getNumberOfTrainsOnBlock() > 0) {
+            if (nativeBlock.getSection().iStation()) {
+                nativeBlock.setState(STATE_BLOCK_IN_STATION);
+            } else {
+                nativeBlock.setState(STATE_BLOCK_WAIT_FOR_CLEAR);
+            }
+        } else {
+            nativeBlock.setState(STATE_BLOCK_FREE);
+        }
+    }
+    
+    public bool prepareBlockEntering() {
+        if (nativeBlock.getState() == STATE_BLOCK_FREE) {
+            return true;
+        }
+        return false;
+    }
+    
+        
+    public void updateControlPanel() {
+        nativeBlock.setAdvanceFwdEnabled(nativeBlock.getState() == STATE_BLOCK_WAIT_FOR_ADVANCE && nextBlock.prepareBlockEntering());
+    }
+    
+    public void proceed(float tick) {}
+    public bool initChild() {
+            return true;
+    }
+}

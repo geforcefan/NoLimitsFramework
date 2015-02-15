@@ -1,0 +1,31 @@
+package com.nolimitsframework;
+
+import com.nolimitscoaster.Script;
+import com.nolimitscoaster.Simulator;
+
+public abstract class FrameworkScript extends Script {
+    protected Framework framework;
+    
+    public bool onInit() {
+        framework = new Framework(this);
+        init();
+        return true;
+    }
+    
+    public abstract void init();
+    
+    public void setProcess(Process p) {
+        framework.setProcess(p);
+    }
+    
+    public Simulator getSimulator() {
+        return sim;
+    }
+    
+    public void onNextFrame(float tick) {
+        framework.proceed(tick);
+        nextFrame(tick);
+    }
+    
+    public void nextFrame(float tick) {}
+}

@@ -1,0 +1,148 @@
+package com.nolimitsframework.scenery;
+
+import com.nolimitscoaster.*;
+import com.nolimitsframework.*;
+import com.nolimitsframework.transition.*;
+import com.nolimitsframework.util.*;
+import nlvm.math3d.*;
+import nlvm.util.*;
+
+public class SceneryLight extends Transition implements Process { 
+    static final public int PROPERTY_POSITION = 0;
+    static final public int PROPERTY_POSITION_X = 10;
+    static final public int PROPERTY_POSITION_Y = 11;
+    static final public int PROPERTY_POSITION_Z = 12;
+    
+    private String objectName;
+    private SceneObject object = null;
+    private SceneObjectElement element = null;
+    private SceneObjectLight light = null;
+    
+    private Vector3f elementPosition = null;
+    private Vector3f elementRotation = null;
+    private Vector3f elementScale = null;
+    
+    public SceneryLight(String _name) {
+        super();
+        seekForSceneryObject(_name);
+    }
+    
+    private void initSceneryObject(String _name, bool setProcess) {
+        objectName = _name;
+        
+        object = Framework.getSimulator().getSceneObject(_name);
+        System.out.println("Crawling Object " + _name);
+        
+        if(object == null) {
+            System.err.println("Scenery Object '" + objectName + "' not found");
+        } else {
+            if(setProcess == true) Framework.setProcess(this);
+        }
+    }
+    
+    private void initSceneryLight(String _name) {
+    	if(object == null) return;
+    	
+        element = object.getElementForName(_name);
+        light = object.getElementForName(_name);
+        
+        if(element == null || light == null) {
+            System.err.println("Scenery Light '" + _name + "' in '" + objectName + "' not found");
+        } else {
+            elementPosition = new Vector3f(0.0f, 0.0f, 0.0f);
+            elementRotation = new Vector3f(0.0f, 0.0f, 0.0f);
+            elementScale = new Vector3f(0.0f, 0.0f, 0.0f);
+            Tools.matrixToPitchHeadBankPosScale(element.getMatrix(), elementRotation, elementPosition, elementScale);
+            
+            Framework.setProcess(this);
+        }
+    }
+    
+    public void seekForSceneryObject(String _name) {
+        Vector matches = new Vector();
+        matches.addElement(new StringBuilder());
+        
+        for(int i=0; i < _name.length(); i++) {
+            char c = _name.charAt(i);
+            if(c == ',') {
+                matches.addElement(new StringBuilder());
+            } else {
+                StringBuilder cs = (StringBuilder)matches.elementAt(matches.size()-1);
+                cs.append(c);
+            }
+        }
+        
+        for(int i=0; i < matches.size(); i++) {
+            StringBuilder cs = (StringBuilder)matches.elementAt(i);
+            String name = StringTools.trim(cs.toString());
+            
+            // Scenery Object
+            if(i == 0) initSceneryObject(name, matches.size()==1?true:false );
+            else initSceneryLight(name);
+        }
+        
+    }
+    
+    public void initForFirstRun() {
+    	if(element != null) Tools.matrixToPitchHeadBankPosScale(element.getMatrix(), elementRotation, elementPosition, elementScale);
+    }
+
+    public float getProperty(int parameter) {
+        if(parameter == PROPERTY_POSITION_X) return elementPosition.x;
+        if(parameter == PROPERTY_POSITION_Y) return elementPosition.y;
+        if(parameter == PROPERTY_POSITION_Z) return elementPosition.z;
+        
+        return 0.0f;
+    }
+    
+    public void setProperty(int parameter, float value) {
+
+        if(parameter == PROPERTY_POSITION_X) {
+            elementPosition.x = value;
+            element.setTranslation(elementPosition);
+        }
+        if(parameter == PROPERTY_POSITION_Y) {
+            elementPosition.y = value;
+            element.setTranslation(elementPosition);
+        }
+        if(parameter == PROPERTY_POSITION_Z) {
+            elementPosition.z = value;
+            element.setTranslation(elementPosition);
+        }
+        
+        if(parameter == PROPERTY_ROTATION_X) {
+            elementRotation.x = value;
+            element.setRotation(elementRotation);
+        }
+        if(parameter == PROPERTY_ROTATION_Y) {
+            elementRotation.y = value;
+            element.setRotation(elementRotation);
+        }
+        if(parameter == PROPERTY_ROTATION_Z) {
+            elementRotation.z = value;
+            element.setRotation(elementRotation);
+        }
+        
+        if(parameter == PROPERTY_SCALE_X) {
+            elementScale.x = value;
+            element.setScale(elementScale);
+        }
+        if(parameter == PROPERTY_SCALE_Y) {
+            elementScale.y = value;
+            element.setScale(elementScale);
+        }
+        if(parameter == PROPERTY_SCALE_Z) {
+            elementRotation.z = value;
+            element.setScale(elementScale);
+        }
+    }
+    
+    public void setMatrix(Matrix4x4f m) {
+    	elementPosition = m.getTrans();
+		element.setMatrix(m);
+    }
+    
+    public Matrix4x4f getMatrix() {
+		element.getMatrix();
+    }
+}

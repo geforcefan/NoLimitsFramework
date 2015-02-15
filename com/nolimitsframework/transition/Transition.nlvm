@@ -1,0 +1,135 @@
+package com.nolimitsframework.transition;
+
+import com.nolimitsframework.easing.*;
+import com.nolimitsframework.constraints.*;
+import com.nolimitsframework.*;
+import nlvm.math3d.*;
+import nlvm.util.*;
+
+public class Transition implements Process {
+    private float animationDuration;
+    private Easing easing;
+    private bool isRunning = false;
+    private bool isFirstRunning = true;
+    private float elapsedTime = 0.0f;
+    
+    private Vector changeProperties;
+    private Vector initProperties;
+    
+    private float startTime = 0.0f;
+    private Vector constraints = new Vector();
+    
+    public Transition() {
+        changeProperties = new Vector();
+        initProperties = new Vector();
+    }
+    
+    public void addConstraint(Constraint constraint) {
+   		constraint.init(this);
+    	constraints.addElement(constraint);
+    }
+    
+    public void callConstraintChanges() {
+        for(int i=0; i< constraints.size(); i++) {
+            Constraint c = (Constraint)constraints.elementAt(i);
+            c.onChange();
+        }  
+    }
+    
+    public void setAnimationProperty(int parameter, float value) {
+         changeProperties.addElement(new TransitionProperty(parameter, value));
+    }
+    public void setAnimationProperty(int parameter, double value) {
+         changeProperties.addElement(new TransitionProperty(parameter, (float)value));
+    }
+    public void setAnimationProperty(int parameter, int value) {
+         changeProperties.addElement(new TransitionProperty(parameter, (float)value));
+    }
+    public void setAnimationProperty(int parameter, Vector3f value) {
+         changeProperties.addElement(new TransitionProperty(parameter + 10, (float)value.x));
+         changeProperties.addElement(new TransitionProperty(parameter + 11, (float)value.y));
+         changeProperties.addElement(new TransitionProperty(parameter + 12, (float)value.z));
+    }
+    
+    public float getProperty(int parameter) { return 0.0f; }
+    public void setProperty(int parameter, float value) {}
+    
+    public void setMatrix(Matrix4x4f m) {}
+    public Matrix4x4f getMatrix() { return new Matrix4x4f(); }
+    
+    public void animate(float duration) {
+        animate(duration, Easing.QUAD_IN_OUT);
+    }
+    
+    public void animate(float duration, int easingType) {
+        animate(0.0f, duration, easingType);
+    }
+    public void animate(float _startTime, float duration, int easingType) {
+        stop(false);
+        animationDuration = duration;
+        easing = Easing.getEasing(easingType);
+        
+        isRunning = true;
+        startTime = _startTime;
+    }
+    
+    public void stop(bool clear) {
+        isFirstRunning = true;
+        isRunning = false;
+        if(clear == true) changeProperties.clear();
+    }
+    
+    public void stop() {
+        stop(true);
+    }
+
+    public bool isInitSuccessfully() {
+        return true;
+    }
+    
+    public void initForFirstRun() {}
+    
+    private void firstRun() {
+   		initForFirstRun();
+        isFirstRunning = false;
+        elapsedTime = startTime;
+        
+        initProperties.clear();
+        for(int i=0; i< changeProperties.size(); i++) {
+            TransitionProperty tp = (TransitionProperty)changeProperties.elementAt(i);
+            initProperties.addElement(new TransitionProperty(tp.parameter, getProperty(tp.parameter)));
+        }     
+    }
+    
+    public void setPropertyChangesToEnd() {
+        for(int i=0; i< changeProperties.size(); i++) {
+            TransitionProperty tp = (TransitionProperty)changeProperties.elementAt(i);
+            setProperty(tp.parameter, tp.value);
+        }
+        changeProperties.clear();
+    }
+          
+    public void proceed(float tick) {
+        if(!isRunning) return;
+        if(isFirstRunning) firstRun();
+        
+        elapsedTime += tick;
+        
+        if(elapsedTime > animationDuration) {
+            for(int i=0; i< changeProperties.size(); i++) {
+                TransitionProperty tp = (TransitionProperty)changeProperties.elementAt(i);
+                setProperty(tp.parameter, tp.value);
+            }
+            stop();
+            return;
+        }
+            	
+            	
+        for(int i=0; i< changeProperties.size(); i++) {
+            TransitionProperty tp = (TransitionProperty)changeProperties.elementAt(i);
+            TransitionProperty itp = (TransitionProperty)initProperties.elementAt(i);
+            setProperty(tp.parameter, (float)easing.getValue((double)elapsedTime, (double)itp.value, (double)tp.value - (double)itp.value, (double)animationDuration));
+        }
+        
+    }
+}

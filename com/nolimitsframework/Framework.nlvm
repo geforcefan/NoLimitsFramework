@@ -1,0 +1,72 @@
+package com.nolimitsframework;
+
+import com.nolimitscoaster.*;
+import nlvm.util.*;
+
+/**
+ * \class Framework
+ *
+ * \brief Provides the skeleton of the framework
+ *
+ * This class provides the skeleton of the framework.
+ * An instance of Framework have to been created to work
+ * proper. In fact, an own class should derive 
+ * FrameworkScript and initialise this class.
+ *
+ * \author Ercan Akyürek
+ *
+ * \version 1.0.0
+ *
+ * \date 2014/04/26 22:54:20
+ *
+ * Contact: kontakt@ercanakyuerek.de
+ *
+ */
+public class Framework extends Script implements Process {
+    private static Vector processes;
+    public static FrameworkScript mainScript;
+    
+    /** \brief Creates a Framework.
+      * \param script is the main class, attached to the coaster. 
+      * 
+      * Creates a Framework.
+      */
+    public Framework(FrameworkScript script) {
+        System.out.println("Initialisation of NoLimitsFramework");
+        
+        processes = new Vector();
+        mainScript = script;
+    }
+    
+    /// Simulator getter.
+    public static Simulator getSimulator() {
+        return mainScript.getSimulator();
+    }
+    
+    public static Coaster getCurrentCoaster() {
+    	Coaster c = Framework.mainScript.getSimulator().getCoasterForEntityId(Framework.mainScript.getParentEntityId());
+    	if(c == null) {
+    		System.err.println("This Script is not attached to a coaster");
+    		return null;
+    	} else {
+        	return c;
+    	}
+    }
+    
+    public static void setProcess(Process p) {
+        if(p.isInitSuccessfully() == false) return;
+        
+        processes.addElement(p);
+    }
+    
+    public void proceed(float tick) {
+        for(int i=0; i < processes.size(); i++) {
+            Process p = (Process)processes.elementAt(i);
+            p.proceed(tick);
+        }
+    }
+    
+    public bool isInitSuccessfully() {
+        return true;
+    }
+}

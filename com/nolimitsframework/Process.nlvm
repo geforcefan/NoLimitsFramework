@@ -1,0 +1,6 @@
+package com.nolimitsframework;
+
+interface Process {
+    abstract public bool isInitSuccessfully();
+    abstract public void proceed(float tick);
+}

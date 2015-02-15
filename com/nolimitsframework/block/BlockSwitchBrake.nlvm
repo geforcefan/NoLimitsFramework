@@ -1,0 +1,198 @@
+package com.nolimitsframework.block;
+import nlvm.lang.String;
+
+public class BlockSwitchBrake extends Block {
+    private int currentState = 0;
+    private com.nolimitscoaster.Block nextNativeBlock = null;
+    private com.nolimitscoaster.SpecialTrack sSwitch = null;
+    private String switchName;
+    
+    private float elapsedTimeOnBlock = 0;
+    
+    private int switchDirection = Block.DIRECTION_LEFT;
+    private bool backwardMode = false;
+    
+    public BlockSwitchBrake(String _name, String _switchName) {
+        name = _name;
+        switchName = _switchName;
+    }
+    
+    public BlockSwitchBrake(String _name, String _switchName, int _switchDirection) {
+        name = _name;
+        switchName = _switchName;
+        switchDirection = _switchDirection;
+    }
+    
+    public BlockSwitchBrake(String _name, String _switchName, int _switchDirection, bool _backwardMode) {
+        name = _name;
+        switchName = _switchName;
+        switchDirection = _switchDirection;
+        backwardMode = _backwardMode;
+    }
+    
+    public bool initChild() {
+        sSwitch = mngr.coaster.getSpecialTrack(switchName);
+        if (sSwitch == null) {
+            System.err.println("SpecialTrack '" + name + "' not found");
+            return false;
+        }
+        
+        return true;
+    }
+    
+    private int getDirection() {
+        return switchDirection;
+    }
+    
+    private int getOppositeDirection() {
+        if(switchDirection == Block.DIRECTION_LEFT) return Block.DIRECTION_RIGHT;
+        else return Block.DIRECTION_LEFT;
+    }
+    
+    private void stateWaitForAdvance(float tick) {
+        nativeBlock.getSection().setBrakesOn();
+        nativeBlock.getSection().setTransportsOff();
+        if (!prepareBlockLeaving()) {
+            nativeBlock.setState(Block.STATE_BLOCK_WAIT_FOR_CLEAR);
+        }
+    }
+    
+    private void stateLeaving(float tick) {
+        if (nativeBlock.getSection().isTrainOnSection()) {
+            elapsedTimeOnBlock = 0;
+            nativeBlock.getSection().setBrakesOff();
+            
+            if(backwardMode == false) {
+                nativeBlock.getSection().setTransportsStandardBwdOn();
+                nativeBlock.getSection().setTransportsLaunchBwdOn();
+            } else {
+                elapsedTimeOnBlock = 0;
+                nativeBlock.getSection().setTransportsStandardFwdOn();
+                nativeBlock.getSection().setTransportsLaunchFwdOn();
+            }
+            
+        } else {
+            nativeBlock.getSection().setBrakesOn();
+            nativeBlock.getSection().setTransportsOff();
+        }
+        if (nativeBlock.getNumberOfTrainsOnBlock() == 0) {
+            nativeBlock.setState(Block.STATE_BLOCK_FREE);
+        }
+    }
+    
+    private void stateFree(float tick) {
+        nativeBlock.getSection().setBrakesOn();
+        nativeBlock.getSection().setTransportsOff();
+    }
+    
+    private void stateApproaching(float tick) { 
+        nativeBlock.getSection().setBrakesOff();
+        nativeBlock.getSection().setTransportsOff();
+        if (nativeBlock.getSection().isTrainOnSection()) {
+            nativeBlock.setState(Block.STATE_BLOCK_BEFORE_TRIGGER);
+        }
+    }
+    
+    private void stateBehindTrigger(float tick) {
+        nativeBlock.getSection().setBrakesOn();
+        nativeBlock.getSection().setTransportsOff(); {
+            if (nativeBlock.getSection().getTrainOnSection().getSpeed() == 0) {
+                elapsedTimeOnBlock = 0;
+                nativeBlock.setState(Block.STATE_BLOCK_WAITING);
+            }
+        }
+    }
+    
+    private void stateBeforeTrigger(float tick) {
+        nativeBlock.getSection().setBrakesTrim();
+        
+        if(backwardMode == false) nativeBlock.getSection().setTransportsStandardFwdDependingOnBrake();
+        else nativeBlock.getSection().setTransportsStandardBwdDependingOnBrake();
+        
+        if (nativeBlock.getSection().isTrainBehindBrakeTrigger()) {
+            nativeBlock.setState(Block.STATE_BLOCK_BEHIND_TRIGGER);
+        }
+    }
+    
+    private void stateWaitForClear(float tick) {
+        nativeBlock.getSection().setBrakesOn();
+        nativeBlock.getSection().setTransportsOff();
+        if (prepareBlockLeaving()) {
+            if (mngr.mode == BlockManager.MANUAL_BLOCK_MODE) {
+                nativeBlock.setState(Block.STATE_BLOCK_WAIT_FOR_ADVANCE);
+            } else {
+                if (nextBlock.prepareBlockEntering()) {
+                    nextBlock.getNativeBlock().setState(Block.STATE_BLOCK_APPROACHING);
+                    nativeBlock.setState(Block.STATE_BLOCK_LEAVING);
+                }
+            }
+        }
+    }
+    
+    private void stateWaiting(float tick) {
+        nativeBlock.getSection().setBrakesOn();
+        nativeBlock.getSection().setTransportsOff();
+        elapsedTimeOnBlock += tick;
+        prepareBlockLeaving();
+        if (elapsedTimeOnBlock >= nativeBlock.getSection().getBrakeWaitTime()) {
+            nativeBlock.setState(Block.STATE_BLOCK_WAIT_FOR_CLEAR);
+        }
+    }
+    
+    public bool prepareBlockEntering() {
+        if(backwardMode == false) {
+            if (nativeBlock.getState() == Block.STATE_BLOCK_FREE) {
+                if (sSwitch.getSwitchDirection() == getDirection()) {
+                    return true;
+                } else {
+                    if (mngr.mode == BlockManager.AUTO_MODE) {
+                        sSwitch.setSwitchDirection(getDirection());
+                    }
+                }
+            }
+            return false;
+        } else {
+            if (nativeBlock.getState() == Block.STATE_BLOCK_FREE && nextBlock.getNativeBlock().getState() != Block.STATE_BLOCK_APPROACHING) {
+                if (sSwitch.getSwitchDirection() == getDirection()) {
+                    return true;
+                } else {
+                    if (mngr.mode == BlockManager.AUTO_MODE) {
+                        sSwitch.setSwitchDirection(getDirection());
+                    }
+                }
+            }
+            return false;
+        }
+    }
+    
+    public bool prepareBlockLeaving() {
+        bool b1 = false;
+        if (sSwitch.getSwitchDirection() == getOppositeDirection()) {
+            b1 = true;
+        } else {
+            if (mngr.mode == BlockManager.AUTO_MODE) {
+                sSwitch.setSwitchDirection(getOppositeDirection());
+            }
+        }
+        return b1;
+    }
+    
+    public void updateControlPanel() {
+        nativeBlock.setAdvanceFwdEnabled(nativeBlock.getState() == Block.STATE_BLOCK_WAIT_FOR_ADVANCE && nextBlock.prepareBlockEntering());
+        sSwitch.setCanManualSwitchDirection((nativeBlock.getState() == Block.STATE_BLOCK_FREE) || (nativeBlock.getState() == Block.STATE_BLOCK_WAIT_FOR_ADVANCE) || (nativeBlock.getState() == Block.STATE_BLOCK_WAIT_FOR_CLEAR));
+    }
+    
+    public void proceed(float tick) {
+        if(nextBlock == null) return;
+        currentState = nativeBlock.getState();
+        
+        if(currentState == Block.STATE_BLOCK_WAIT_FOR_ADVANCE) stateWaitForAdvance(tick);
+        if(currentState == Block.STATE_BLOCK_LEAVING) stateLeaving(tick);
+        if(currentState == Block.STATE_BLOCK_FREE) stateFree(tick);
+        if(currentState == Block.STATE_BLOCK_APPROACHING) stateApproaching(tick);
+        if(currentState == Block.STATE_BLOCK_BEHIND_TRIGGER) stateBehindTrigger(tick);
+        if(currentState == Block.STATE_BLOCK_BEFORE_TRIGGER) stateBeforeTrigger(tick);
+        if(currentState == Block.STATE_BLOCK_WAIT_FOR_CLEAR) stateWaitForClear(tick);
+        if(currentState == Block.STATE_BLOCK_WAITING) stateWaiting(tick);
+    }
+}

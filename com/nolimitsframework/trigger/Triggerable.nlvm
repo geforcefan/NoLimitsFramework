@@ -1,0 +1,9 @@
+package com.nolimitsframework.trigger;
+
+public class Triggerable {
+    public void start() {
+    }
+    
+    public void start(String label) {
+    }
+}

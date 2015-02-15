@@ -1,0 +1,8 @@
+package com.nolimitsframework.easing;
+
+public class EaseInBack extends Easing {
+    public double getValue(double t,double b, double c, double d) {
+        float s = 1.70158f;
+        return c*(t/=d)*t*((s+1)*t - s) + b;
+    }
+}

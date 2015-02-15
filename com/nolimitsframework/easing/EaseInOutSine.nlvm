@@ -1,0 +1,7 @@
+package com.nolimitsframework.easing;
+
+public class EaseInOutSine extends Easing {
+    public double getValue(double t,double b, double c, double d) {
+        return -c/2 * (Math.cos(Math.PI*t/d) - 1) + b;
+    }
+}

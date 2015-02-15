@@ -1,0 +1,14 @@
+package com.nolimitsframework.spline;
+
+import nlvm.math3d.*;
+
+interface Spline {
+	abstract public float getOffsetByLength(float offset);
+	abstract public float getOffsetByPoint(int point);
+    abstract public Vector3f getPosition(float t);
+    abstract public Vector3f getPosition(float t, int segment);
+    abstract public int getSegments();
+    abstract public float getLength();
+    abstract public float getLength(int segment);
+    abstract public void addPoint(Vector3f point);
+}

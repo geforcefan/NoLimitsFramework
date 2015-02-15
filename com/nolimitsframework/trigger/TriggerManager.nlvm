@@ -1,0 +1,50 @@
+package com.nolimitsframework.trigger;
+
+import nlvm.util.*;
+import com.nolimitscoaster.*;
+
+import com.nolimitsframework.util.*;
+import com.nolimitsframework.*;
+
+public class TriggerManager {
+	static public void addTrigger(String query, Triggerable obj, String label) {
+		Vector pieces = StringTools.split(',', query);
+		Coaster coaster = null;
+		
+		String coasterName = "";
+		String triggerNameOnCoaster = "";
+		
+		for(int i=0; i < pieces.size(); i++) {
+			StringBuilder a = (StringBuilder) pieces.elementAt(i);
+			String piece = StringTools.trim(a.toString());
+			
+			if(pieces.size() > 1) {
+				if(i == 0 && piece.equals("Current Coaster")) {
+					coaster = Framework.getCurrentCoaster();
+					if (coaster == null) return;
+				} else if(i == 0) {
+					coasterName = piece;
+					coaster = Framework.getSimulator().getCoaster(piece);
+				} else if(i > 0) {
+					triggerNameOnCoaster = piece;
+					break;
+				}
+			} else {
+				triggerNameOnCoaster = piece;
+			}
+		}
+		
+		if(coaster == null) {
+            System.err.println("Your specified coaster '" + coasterName + "' is not found.");
+			return;
+		}
+		
+		TrackTrigger trigger = coaster.getTrackTrigger(triggerNameOnCoaster);
+		if(trigger == null) {
+            System.err.println("Your trigger '" + triggerNameOnCoaster + "' is not in coaster '" + coaster + "' found.");
+			
+		}
+		
+		trigger.addTrackTriggerListener(new TriggerListener(obj, label));
+	}
+}

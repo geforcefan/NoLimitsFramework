@@ -1,0 +1,7 @@
+package com.nolimitsframework.easing;
+
+public class EaseInQuint extends Easing {
+    public double getValue(double t,double b, double c, double d) {
+        return c*(t/=d)*t*t*t*t + b;
+    }
+}

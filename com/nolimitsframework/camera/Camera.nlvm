@@ -1,0 +1,46 @@
+package com.nolimitsframework.camera;
+
+import com.nolimitscoaster.*;
+import com.nolimitsframework.*;
+import com.nolimitsframework.transition.*;
+import com.nolimitsframework.util.*;
+import nlvm.math3d.*;
+import nlvm.util.*;
+
+public class Camera extends Transition implements Process {
+    static final public int PROPERTY_POSITION = 0;
+    static final public int PROPERTY_POSITION_X = 10;
+    static final public int PROPERTY_POSITION_Y = 11;
+    static final public int PROPERTY_POSITION_Z = 12;
+    
+    private String name;
+    
+    private Vector3f pos = new Vector3f(0.0f, 10.f, 0.0f);
+    private Matrix4x4f matrix = new Matrix4x4f();
+    
+    private float horizontalAngle = 3.14f;
+    private float verticalAngle = 0.0f;
+    private float fov = 45.0f;
+    
+    private ExternalRideView view = null;
+    
+    public Camera(String _name) {
+        super();
+        name = _name;
+        view = Framework.getSimulator().createExternalRideView();
+        view.setLabel(name);
+        view.setEnterWarpPoint(new Vector3f(0.0f, 1.0f, 0.0f), 10.0f);
+        
+        Framework.setProcess(this);
+        calculate();
+    }
+    
+    public void calculate() {
+    	view.setCameraMatrix(matrix);
+    }
+    
+    public void setMatrix(Matrix4x4f m) {
+    	matrix = m;
+    	calculate();
+    }
+}
