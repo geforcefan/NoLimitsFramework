@@ -2,6 +2,7 @@ package com.nolimitsframework.block;
 import nlvm.lang.String;
 
 public class BlockSwitchBrake extends Block {
+    private int lastState = 0;
     private int currentState = 0;
     private com.nolimitscoaster.Block nextNativeBlock = null;
     private com.nolimitscoaster.SpecialTrack sSwitch = null;
@@ -186,6 +187,8 @@ public class BlockSwitchBrake extends Block {
         if(nextBlock == null) return;
         currentState = nativeBlock.getState();
         
+        if(currentState != lastState) stateChanged(currentState);
+        
         if(currentState == Block.STATE_BLOCK_WAIT_FOR_ADVANCE) stateWaitForAdvance(tick);
         if(currentState == Block.STATE_BLOCK_LEAVING) stateLeaving(tick);
         if(currentState == Block.STATE_BLOCK_FREE) stateFree(tick);
@@ -195,4 +198,6 @@ public class BlockSwitchBrake extends Block {
         if(currentState == Block.STATE_BLOCK_WAIT_FOR_CLEAR) stateWaitForClear(tick);
         if(currentState == Block.STATE_BLOCK_WAITING) stateWaiting(tick);
     }
+        
+        lastState = currentState;
 }

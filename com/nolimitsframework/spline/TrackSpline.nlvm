@@ -1,0 +1,39 @@
+package com.nolimitsframework.spline;
+
+import nlvm.math3d.*;
+import nlvm.util .*;
+import com.nolimitscoaster.*;
+import com.nolimitsframework.*;
+
+public class TrackSpline extends SplineLinear implements Spline {
+    public TrackSpline(Vector3f startOrigin, float length, bool backward, float division) {
+        TrackPos trackPos = Framework.getSimulator().findNearestCoasterTrack(startOrigin, 1.0f);
+        float currentLen = 0;
+        Vector points = new Vector();
+        
+        while(currentLen < length) {
+            if(backward == false) {
+                trackPos = trackPos.getTrackPosOnCenterRailsWithOffset(division);
+                points.addElement(trackPos.getCenterRailsPos());
+            } else {
+                trackPos = trackPos.getTrackPosOnCenterRailsWithOffset(-division);
+                points.addElement(trackPos.getCenterRailsPos());
+            }
+            
+            currentLen += division;
+        }
+        if(backward == true) {        
+            int end = points.size() - 1;
+            for (int c = 0; c < points.size()/2; c++) {
+                Object t = points.elementAt(c);
+                points.setElementAt(points.elementAt(end), c);
+                points.setElementAt(t, end);
+                end--;
+            }
+        }
+
+        for(int i=0; i < points.size(); i++) {
+            addPoint((Vector3f)points.elementAt(i));
+        }
+    }
+}

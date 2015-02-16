@@ -296,4 +296,17 @@ public class SceneryObject extends Transition implements Process {
     	if(element != null) return element.getMatrix();
     	else return object.getMatrix();
     }
+    
+    public SceneObjectElement getElement() {
+        return element;
+    }
+    
+    public SceneObject getObject() {
+        return object;
+    }
+    
+    public Object getNativeObject() {
+    	if(element != null) return getElement();
+    	else return getObject();
+    }
 }

@@ -36,7 +36,7 @@ public class SplineLinear implements Spline {
     	
     	for(int i=0; i < lenghtVectors.size(); i++) {
     		Vector3f lvector = (Vector3f) lenghtVectors.elementAt(i);
-    		
+    	    
     		if(ltotal + lvector.length() > loffset) {
     			float lcurr = (loffset - ltotal);
     			float nt = lcurr / lvector.length();
@@ -51,6 +51,7 @@ public class SplineLinear implements Spline {
     }
     
     public Vector3f getPosition(float t, int segment) {
+        
     	if(points.size() > segment + 1) {
     		Vector3f p1 = (Vector3f)points.elementAt(segment);
     		Vector3f p2 = (Vector3f)points.elementAt(segment + 1);
@@ -60,6 +61,8 @@ public class SplineLinear implements Spline {
     		p3.y = p1.y * (1.0f-t) + p2.y * t;
     		p3.z = p1.z * (1.0f-t) + p2.z * t;
     		
+        //System.out.println("get t: " + t + " on segment: " + segment + " " + p1 + " - " + p2);
+        
     		return p3;
     	} else {
 			return new Vector3f(0.0f, 0.0f, 0.0f);

@@ -1,0 +1,13 @@
+package com.nolimitsframework.vectorobjects;
+
+public class Float {
+    private float value = 0.0f;
+    
+    public Float(float val) {
+        value = val;
+    }
+    
+    public float getValue() {
+        return value;
+    }
+}

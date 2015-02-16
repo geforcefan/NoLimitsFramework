@@ -27,6 +27,7 @@ public class BlockManager implements Process, BlockSystemController {
         } else bIsInitSuccessfully = true;
         
         initBlock();
+        Framework.setProcess(this);
     }
     
     public BlockManager(String coastername) {
@@ -39,6 +40,7 @@ public class BlockManager implements Process, BlockSystemController {
         } else bIsInitSuccessfully = true;
         
         initBlock();
+        Framework.setProcess(this);
     }
     
     public void initBlock() {

@@ -1,0 +1,13 @@
+package com.nolimitsframework.vectorobjects;
+
+public class Int {
+    private int value = 0;
+    
+    public Int(int val) {
+        value = val;
+    }
+    
+    public int getValue() {
+        return value;
+    }
+}

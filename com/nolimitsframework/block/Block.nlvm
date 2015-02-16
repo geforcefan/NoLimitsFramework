@@ -1,6 +1,8 @@
 package com.nolimitsframework.block;
 
 import nlvm.lang.String;
+import nlvm.util.*;
+import com.nolimitsframework.objects.*;
 
 public class Block {
     public String name;
@@ -25,6 +27,8 @@ public class Block {
     
     public static final int DIRECTION_LEFT = 0;
     public static final int DIRECTION_RIGHT = 1;
+    
+    protected Vector objects = null;
     
     public void setNextBlock(Block b) {
         nextBlock = b;
@@ -93,5 +97,18 @@ public class Block {
     public void proceed(float tick) {}
     public bool initChild() {
             return true;
+    }
+    
+    public void attachObject(BlockObject obj) {
+        if(objects == null) objects = new Vector();
+        objects.addElement(obj);
+    }
+    
+    public void stateChanged(int state) {
+        if(objects == null) objects = new Vector();
+        for(int i=0; i < objects.size(); i++) {
+            BlockObject obj = (BlockObject)objects.elementAt(i);
+            obj.stateChanged(state, this);
+        }
     }
 }

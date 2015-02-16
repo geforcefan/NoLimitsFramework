@@ -2,6 +2,7 @@ package com.nolimitsframework.constraints;
 
 import com.nolimitsframework.spline.*;
 import com.nolimitsframework.util.*;
+import com.nolimitsframework.transition.*;
 import com.nolimitsframework.*;
 
 import nlvm.math3d.*;
@@ -28,6 +29,10 @@ public class AlignToSpline extends Constraint implements Process  {
 	private Vector3f axis = new Vector3f(0.0f, 0.0f, 1.0f);
 	private float banking = 0.0f;
 	
+    public String getName() {
+        return "AlignToSpline";
+    }
+    
 	public AlignToSpline(Spline _spline, bool _tangential) {
         super();
         spline = _spline;
@@ -46,7 +51,7 @@ public class AlignToSpline extends Constraint implements Process  {
 		banking = _banking;
 	}
 	
-	public void onChange() {
+	public void onChange(Transition _obj) {
 	}
 	
 	public float getProperty(int parameter) {
@@ -78,6 +83,7 @@ public class AlignToSpline extends Constraint implements Process  {
         	setPosition();
         }
         
+        callConstraintChanges();
         obj.callConstraintChanges();
     }
     
@@ -123,9 +129,12 @@ public class AlignToSpline extends Constraint implements Process  {
         	
         	obj.setMatrix(t);
         } else {
-       	 	obj.setProperty(PROPERTY_POSITION_X, pos.x);
-       	 	obj.setProperty(PROPERTY_POSITION_Y, pos.y);
-       	 	obj.setProperty(PROPERTY_POSITION_Z, pos.z);		  		
+        
+        	Matrix4x4f t = MathTools.initMatrix(1.0f, 0.0f, 0.0f, pos.x,
+        								  		0.0f, 1.0f, 0.0f, pos.y,
+        								  		0.0f, 0.0f, 1.0f, pos.z,
+        								  		0.0f, 0.0f, 0.0f, 1.0f);	
+        	obj.setMatrix(t);
         }
     }
 }

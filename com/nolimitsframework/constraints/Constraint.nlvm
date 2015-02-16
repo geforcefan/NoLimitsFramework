@@ -6,10 +6,19 @@ import com.nolimitsframework.*;
 public class Constraint extends Transition implements Process {
 	protected Transition obj = null;
     
-    public void init(Transition _obj) {
+    public String getName() {
+        return "Constaint";
+    }
+    
+    public void init(Transition _obj, bool ignoreProcess) {
     	obj = _obj;
+        if(ignoreProcess == true) return;
     	if(obj != null) Framework.setProcess(this);
     }
     
-	public void onChange() {}
+    public void init(Transition _obj) {
+        init(_obj, false);
+    }
+    
+	public void onChange(Transition _obj) {}
 }
