@@ -1,16 +1,18 @@
 package com.nolimitsframework.block;
+
 import nlvm.lang.String;
 
 public class BlockRegularLift extends Block {
+
     private int lastState = 0;
     private int currentState = 0;
     private float elapsedTimeOnBlock = 0;
     private com.nolimitscoaster.Block nextNativeBlock = null;
-    
+
     public BlockRegularLift(String _name) {
         name = _name;
     }
-    
+
     private void stateWaitForAdvance(float tick) {
         if (mngr.mode == BlockManager.AUTO_MODE) {
             nativeBlock.setState(Block.STATE_BLOCK_BEHIND_TRIGGER);
@@ -18,18 +20,18 @@ public class BlockRegularLift extends Block {
             nativeBlock.getSection().setLiftOff();
         }
     }
-    
+
     private void stateLeaving(float tick) {
         nativeBlock.getSection().setLiftFwdOn();
         if (nativeBlock.getNumberOfTrainsOnBlock() == 0) {
             nativeBlock.setState(Block.STATE_BLOCK_FREE);
         }
     }
-    
+
     private void stateFree(float tick) {
         nativeBlock.getSection().setLiftOff();
     }
-    
+
     private void stateApproaching(float tick) {
         nextBlock.prepareBlockEntering();
         if (nativeBlock.getSection().isTrainOnSection()) {
@@ -38,7 +40,7 @@ public class BlockRegularLift extends Block {
             nativeBlock.getSection().setLiftOff();
         }
     }
-    
+
     private void stateBehindTrigger(float tick) {
         if (mngr.mode == BlockManager.MANUAL_BLOCK_MODE) {
             nativeBlock.setState(Block.STATE_BLOCK_WAIT_FOR_ADVANCE);
@@ -51,14 +53,14 @@ public class BlockRegularLift extends Block {
             }
         }
     }
-    
+
     private void stateBeforeTrigger(float tick) {
         nativeBlock.getSection().setLiftFwdOn();
         if (nativeBlock.getSection().isTrainBehindLiftTrigger()) {
             nativeBlock.setState(Block.STATE_BLOCK_BEHIND_TRIGGER);
         }
     }
-    
+
     private void stateWaitForClear(float tick) {
         if (nativeBlock.getSection().isTrainBehindLiftTrigger()) {
             nativeBlock.setState(Block.STATE_BLOCK_BEHIND_TRIGGER);
@@ -66,21 +68,39 @@ public class BlockRegularLift extends Block {
             nativeBlock.setState(Block.STATE_BLOCK_BEFORE_TRIGGER);
         }
     }
-    
+
     public void proceed(float tick) {
-        if(nextBlock == null) return;
+        if (nextBlock == null) {
+            return;
+        }
         currentState = nativeBlock.getState();
-        
-        if(currentState != lastState) stateChanged(currentState);
-        
-        if(currentState == Block.STATE_BLOCK_WAIT_FOR_ADVANCE) stateWaitForAdvance(tick);
-        if(currentState == Block.STATE_BLOCK_LEAVING) stateLeaving(tick);
-        if(currentState == Block.STATE_BLOCK_FREE) stateFree(tick);
-        if(currentState == Block.STATE_BLOCK_APPROACHING) stateApproaching(tick);
-        if(currentState == Block.STATE_BLOCK_BEHIND_TRIGGER) stateBehindTrigger(tick);
-        if(currentState == Block.STATE_BLOCK_BEFORE_TRIGGER) stateBeforeTrigger(tick);
-        if(currentState == Block.STATE_BLOCK_WAIT_FOR_CLEAR) stateWaitForClear(tick);
-        
+
+        if (currentState != lastState) {
+            stateChanged(currentState);
+        }
+
+        if (currentState == Block.STATE_BLOCK_WAIT_FOR_ADVANCE) {
+            stateWaitForAdvance(tick);
+        }
+        if (currentState == Block.STATE_BLOCK_LEAVING) {
+            stateLeaving(tick);
+        }
+        if (currentState == Block.STATE_BLOCK_FREE) {
+            stateFree(tick);
+        }
+        if (currentState == Block.STATE_BLOCK_APPROACHING) {
+            stateApproaching(tick);
+        }
+        if (currentState == Block.STATE_BLOCK_BEHIND_TRIGGER) {
+            stateBehindTrigger(tick);
+        }
+        if (currentState == Block.STATE_BLOCK_BEFORE_TRIGGER) {
+            stateBeforeTrigger(tick);
+        }
+        if (currentState == Block.STATE_BLOCK_WAIT_FOR_CLEAR) {
+            stateWaitForClear(tick);
+        }
+
         lastState = currentState;
     }
 }

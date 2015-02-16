@@ -1,10 +1,11 @@
 package com.nolimitsframework.animation;
 
 public class AnimationLabel {
+
     public String label;
     public float startTime;
     public float endTime;
-    
+
     public AnimationLabel(String _label, float _startTime, float _endTime) {
         label = _label;
         startTime = _startTime;

@@ -1,7 +1,8 @@
 package com.nolimitsframework.easing;
 
 public class EaseOutCubic extends Easing {
-    public double getValue(double t,double b, double c, double d) {
-        return c*((t=t/d-1)*t*t + 1) + b;
+
+    public double getValue(double t, double b, double c, double d) {
+        return c * ((t = t / d - 1) * t * t + 1) + b;
     }
 }

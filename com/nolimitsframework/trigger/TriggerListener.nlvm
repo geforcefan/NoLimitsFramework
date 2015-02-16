@@ -3,20 +3,24 @@ package com.nolimitsframework.trigger;
 import com.nolimitscoaster.*;
 
 public class TriggerListener implements TrackTriggerListener {
-	private Triggerable obj;
-	private String label;
 
-	public TriggerListener(Triggerable _obj, String _label) {
-		obj = _obj;
-		label = _label;
-	}
-	
-	public void onTrainEntering(TrackTrigger trigger, Train train) {
-		if(label.length() > 0) obj.start(label);
-		else obj.start();
-	}
-	
-	public void onTrainLeaving(TrackTrigger trigger, Train train) {
-	
-	}
+    private Triggerable obj;
+    private String label;
+
+    public TriggerListener(Triggerable _obj, String _label) {
+        obj = _obj;
+        label = _label;
+    }
+
+    public void onTrainEntering(TrackTrigger trigger, Train train) {
+        if (label.length() > 0) {
+            obj.start(label);
+        } else {
+            obj.start();
+        }
+    }
+
+    public void onTrainLeaving(TrackTrigger trigger, Train train) {
+
+    }
 }

@@ -9,60 +9,66 @@ import nlvm.math3d.*;
 import nlvm.util.*;
 
 public class Animation extends Triggerable implements Process {
+
     private Transition obj = null;
     private Vector animationItems = new Vector();
     private Vector labels = new Vector();
-    
+
     private bool isRunnning = false;
     private float endDuration = 0.0f;
-    
+
     private float currentTick = -0.01f;
-    
+
     private float stopTime = 0.0f;
     private float startTime = 0.0f;
-    
+
     public Animation(String query) {
-    	String InitType = "";
-    	String InitArguments = "";
-    	
-    	Vector queryPieces = splitString(':', query);
-        for(int i=0; i < queryPieces.size(); i++) {
-        	StringBuilder a = (StringBuilder)queryPieces.elementAt(i);
-        	String queryPiece = trim(a.toString());
-        	
-        	if(i == 0) InitType = queryPiece;
-        	else InitArguments = queryPiece;
+        String InitType = "";
+        String InitArguments = "";
+
+        Vector queryPieces = splitString(':', query);
+        for (int i = 0; i < queryPieces.size(); i++) {
+            StringBuilder a = (StringBuilder) queryPieces.elementAt(i);
+            String queryPiece = trim(a.toString());
+
+            if (i == 0) {
+                InitType = queryPiece;
+            } else {
+                InitArguments = queryPiece;
+            }
         }
-        
-        if(InitType.equals("Scenery")) {
-        	obj = new SceneryObject(InitArguments);
+
+        if (InitType.equals("Scenery")) {
+            obj = new SceneryObject(InitArguments);
         } else {
-        	System.err.println("Animation query syntax error for expression '" + query + "'");
+            System.err.println("Animation query syntax error for expression '" + query + "'");
         }
-        
-        if(obj != null) Framework.setProcess(this);
+
+        if (obj != null) {
+            Framework.setProcess(this);
+        }
     }
-    
+
     private Vector splitString(char split, String input) {
         Vector matches = new Vector();
         matches.addElement(new StringBuilder());
-        
-        for(int i=0; i < input.length(); i++) {
+
+        for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
-            if(c == split) {
+            if (c == split) {
                 matches.addElement(new StringBuilder());
             } else {
-                StringBuilder cs = (StringBuilder)matches.elementAt(matches.size()-1);
+                StringBuilder cs = (StringBuilder) matches.elementAt(matches.size() - 1);
                 cs.append(c);
             }
         }
-        
+
         return matches;
     }
-    
+
     private String trim(String in) {
         String str = in;
-        
+
         while (str.charAt(0) == ' ') {
             str = str.substring(1, str.length());
         }
@@ -71,101 +77,115 @@ public class Animation extends Triggerable implements Process {
         }
         return str;
     }
-    
+
     public Animation(Transition _obj) {
         obj = _obj;
         Framework.setProcess(this);
     }
-    
+
     public void addAnimation(int parameter, float value, float from, float to, int easing) {
         float duration = to - from;
-        if(to > endDuration) endDuration = to;
-        animationItems.addElement(new AnimationItem(new TransitionProperty(parameter, (float)value), from, duration, easing));
+        if (to > endDuration) {
+            endDuration = to;
+        }
+        animationItems.addElement(new AnimationItem(new TransitionProperty(parameter, (float) value), from, duration, easing));
     }
+
     public void addAnimation(int parameter, double value, float from, float to, int easing) {
         float duration = to - from;
-        if(to > endDuration) endDuration = to;
-        animationItems.addElement(new AnimationItem(new TransitionProperty(parameter, (float)value), from, duration, easing));
+        if (to > endDuration) {
+            endDuration = to;
+        }
+        animationItems.addElement(new AnimationItem(new TransitionProperty(parameter, (float) value), from, duration, easing));
     }
+
     public void addAnimation(int parameter, int value, float from, float to, int easing) {
         float duration = to - from;
-        if(to > endDuration) endDuration = to;
-        animationItems.addElement(new AnimationItem(new TransitionProperty(parameter, (float)value), from, duration, easing));
+        if (to > endDuration) {
+            endDuration = to;
+        }
+        animationItems.addElement(new AnimationItem(new TransitionProperty(parameter, (float) value), from, duration, easing));
     }
+
     public void addAnimation(int parameter, Vector3f value, float from, float to, int easing) {
         float duration = to - from;
-        if(to > endDuration) endDuration = to;
-        
-        animationItems.addElement(new AnimationItem(new TransitionProperty(parameter + 10, (float)value.x), from, duration, easing));
-        animationItems.addElement(new AnimationItem(new TransitionProperty(parameter + 11, (float)value.y), from, duration, easing));
-        animationItems.addElement(new AnimationItem(new TransitionProperty(parameter + 12, (float)value.z), from, duration, easing));
+        if (to > endDuration) {
+            endDuration = to;
+        }
+
+        animationItems.addElement(new AnimationItem(new TransitionProperty(parameter + 10, (float) value.x), from, duration, easing));
+        animationItems.addElement(new AnimationItem(new TransitionProperty(parameter + 11, (float) value.y), from, duration, easing));
+        animationItems.addElement(new AnimationItem(new TransitionProperty(parameter + 12, (float) value.z), from, duration, easing));
     }
-    
+
     public bool isInitSuccessfully() {
         return true;
     }
-    
+
     public void proceed(float tick) {
-        if(!isRunnning) return;
-        
-        if(currentTick > stopTime) {
+        if (!isRunnning) {
+            return;
+        }
+
+        if (currentTick > stopTime) {
             obj.stop();
             isRunnning = false;
             return;
         }
-        
-        for(int i=0; i < animationItems.size(); i++) {
-            AnimationItem item = (AnimationItem)animationItems.elementAt(i);
-            if(!item.isRunning) {
-                if(currentTick >= item.startTime) {
+
+        for (int i = 0; i < animationItems.size(); i++) {
+            AnimationItem item = (AnimationItem) animationItems.elementAt(i);
+            if (!item.isRunning) {
+                if (currentTick >= item.startTime) {
                     obj.setAnimationProperty(item.property.parameter, item.property.value);
                     obj.animate(currentTick - item.startTime, item.duration, item.easing);
                     item.isRunning = true;
                 }
             }
         }
-        
+
         currentTick += tick;
     }
-    
+
     public void setLabel(String label, float startTime, float endTime) {
         labels.addElement(new AnimationLabel(label, startTime, endTime));
     }
-    
+
     public void start() {
         currentTick = -0.01f;
         stopTime = endDuration;
-        
-        for(int i=0; i < animationItems.size(); i++) {
-            AnimationItem item = (AnimationItem)animationItems.elementAt(i);
+
+        for (int i = 0; i < animationItems.size(); i++) {
+            AnimationItem item = (AnimationItem) animationItems.elementAt(i);
             item.isRunning = false;
         }
         isRunnning = true;
     }
-    
-    
+
     public void start(String label) {
         bool found = false;
-        for(int i=0; i < labels.size(); i++) {
-            AnimationLabel item = (AnimationLabel)labels.elementAt(i);
-            if(item.label.equals(label)) {
+        for (int i = 0; i < labels.size(); i++) {
+            AnimationLabel item = (AnimationLabel) labels.elementAt(i);
+            if (item.label.equals(label)) {
                 currentTick = item.startTime;
                 stopTime = item.endTime;
                 found = true;
             }
         }
-        if(found == false) {
+        if (found == false) {
             System.err.println("Animation label '" + label + "' not found");
             return;
         }
-        
-        for(int i=0; i < animationItems.size(); i++) {
-            AnimationItem item = (AnimationItem)animationItems.elementAt(i);
-            if(currentTick >= item.startTime + item.duration) {
+
+        for (int i = 0; i < animationItems.size(); i++) {
+            AnimationItem item = (AnimationItem) animationItems.elementAt(i);
+            if (currentTick >= item.startTime + item.duration) {
                 obj.setAnimationProperty(item.property.parameter, item.property.value);
                 obj.setPropertyChangesToEnd();
                 item.isRunning = true;
-            } else item.isRunning = false;
+            } else {
+                item.isRunning = false;
+            }
         }
         isRunnning = true;
     }

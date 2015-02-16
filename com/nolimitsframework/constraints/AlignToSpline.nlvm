@@ -7,134 +7,134 @@ import com.nolimitsframework.*;
 
 import nlvm.math3d.*;
 
-public class AlignToSpline extends Constraint implements Process  {
+public class AlignToSpline extends Constraint implements Process {
+
     static final public int PROPERTY_POSITION = 0;
     static final public int PROPERTY_POSITION_X = 10;
     static final public int PROPERTY_POSITION_Y = 11;
-    static final public int PROPERTY_POSITION_Z = 12; 
-    
-	static final public int PROPERTY_POSITION_RELATIVE = 60;
-	static final public int PROPERTY_POSITION_ABSOLUTE = 61;
-	static final public int PROPERTY_POSITION_KNOT = 62;
-	static final public int PROPERTY_POSITION_BANKING = 63;
-    
-	private Spline spline = null;
-	private Vector3f bankaxis = new Vector3f(0.0f, 0.0f, 1.0f);
-	
-	private float relativePosition = 0.0f;
-	private float absolutePosition = 0.0f;
-	private int knotPosition = 0;
-	
-	private bool tangential = false;
-	private Vector3f axis = new Vector3f(0.0f, 0.0f, 1.0f);
-	private float banking = 0.0f;
-	
+    static final public int PROPERTY_POSITION_Z = 12;
+
+    static final public int PROPERTY_POSITION_RELATIVE = 60;
+    static final public int PROPERTY_POSITION_ABSOLUTE = 61;
+    static final public int PROPERTY_POSITION_KNOT = 62;
+    static final public int PROPERTY_POSITION_BANKING = 63;
+
+    private Spline spline = null;
+    private Vector3f bankaxis = new Vector3f(0.0f, 0.0f, 1.0f);
+
+    private float relativePosition = 0.0f;
+    private float absolutePosition = 0.0f;
+    private int knotPosition = 0;
+
+    private bool tangential = false;
+    private Vector3f axis = new Vector3f(0.0f, 0.0f, 1.0f);
+    private float banking = 0.0f;
+
     public String getName() {
         return "AlignToSpline";
     }
-    
-	public AlignToSpline(Spline _spline, bool _tangential) {
+
+    public AlignToSpline(Spline _spline, bool _tangential) {
         super();
         spline = _spline;
         tangential = _tangential;
-	}
-	
-	public void setTangential(bool enabled) {
-		tangential = enabled;
-	}
-	
-	public void setAxis(Vector3f _axis) {
-		axis = _axis;
-	}
-	
-	public void setBanking(float _banking) {
-		banking = _banking;
-	}
-	
-	public void onChange(Transition _obj) {
-	}
-	
-	public float getProperty(int parameter) {
-        if(parameter == PROPERTY_POSITION_RELATIVE) {
-        	return relativePosition;
-        }
-        if(parameter == PROPERTY_POSITION_ABSOLUTE) {
-        	return absolutePosition;
-        }
-        if(parameter == PROPERTY_POSITION_BANKING) {
-        	return banking;
-        }
-        
-		return 0.0f;
     }
-    
+
+    public void setTangential(bool enabled) {
+        tangential = enabled;
+    }
+
+    public void setAxis(Vector3f _axis) {
+        axis = _axis;
+    }
+
+    public void setBanking(float _banking) {
+        banking = _banking;
+    }
+
+    public void onChange(Transition _obj) {
+    }
+
+    public float getProperty(int parameter) {
+        if (parameter == PROPERTY_POSITION_RELATIVE) {
+            return relativePosition;
+        }
+        if (parameter == PROPERTY_POSITION_ABSOLUTE) {
+            return absolutePosition;
+        }
+        if (parameter == PROPERTY_POSITION_BANKING) {
+            return banking;
+        }
+
+        return 0.0f;
+    }
+
     public void setProperty(int parameter, float value) {
-        if(parameter == PROPERTY_POSITION_RELATIVE) {
-        	relativePosition = value;
-        	setPosition();
+        if (parameter == PROPERTY_POSITION_RELATIVE) {
+            relativePosition = value;
+            setPosition();
         }
-        if(parameter == PROPERTY_POSITION_BANKING) {
-        	banking = value;
-        	setPosition();
+        if (parameter == PROPERTY_POSITION_BANKING) {
+            banking = value;
+            setPosition();
         }
-        if(parameter == PROPERTY_POSITION_ABSOLUTE) {
-        	absolutePosition = value;
-        	relativePosition = spline.getOffsetByLength(absolutePosition);
-        	setPosition();
+        if (parameter == PROPERTY_POSITION_ABSOLUTE) {
+            absolutePosition = value;
+            relativePosition = spline.getOffsetByLength(absolutePosition);
+            setPosition();
         }
-        
+
         callConstraintChanges();
         obj.callConstraintChanges();
     }
-    
+
     public void setPosition() {
-    	Vector3f pos = spline.getPosition(relativePosition);
-        if(tangential == true) {
-    		Vector3f pos2 = spline.getPosition(relativePosition + 0.001f);
-        		
-        	Vector3f normal = new Vector3f();
-        	normal.x = pos2.x - pos.x;
-        	normal.y = pos2.y - pos.y;
-       	 	normal.z = pos2.z - pos.z;
-       	 	normal.normalize();
-        		
-        	Vector3f up = new Vector3f(0.0f, 1.0f, 0.0f);
-    		Vector3f upAxis = MathTools.cross(up, normal);
-        	upAxis.normalize();
-       		float upAngle = MathTools.angle(up, normal);
-       		
-        		
-        	Vector3f side = new Vector3f(0.0f, 0.0f, 1.0f);
-    		Vector3f sideAxis = MathTools.cross(side, upAxis);
-    		
-    		float len = (float)Math.sqrt(sideAxis.x * sideAxis.x + sideAxis.y * sideAxis.y);
-			if(len == 0.0f) {
-				sideAxis.x = 0.0f;
-				sideAxis.y = -1.0f;
-				sideAxis.z = 0.0f;
-			}
-    		
-        	sideAxis.normalize();
-       		float sideAngle = MathTools.angle(side, upAxis);
-        		
-        	Matrix4x4f t = MathTools.initMatrix(1.0f, 0.0f, 0.0f, pos.x,
-        								  		0.0f, 1.0f, 0.0f, pos.y,
-        								  		0.0f, 0.0f, 1.0f, pos.z,
-        								  		0.0f, 0.0f, 0.0f, 1.0f);
-        								  		
-        	MathTools.rotate(t, (float)Math.toRadians((double)upAngle), upAxis.x, upAxis.y, upAxis.z);  
-        	MathTools.rotate(t, (float)Math.toRadians((double)sideAngle), sideAxis.x, sideAxis.y, sideAxis.z);
-        	MathTools.rotate(t, (float)Math.toRadians(-90.0), axis.x, axis.y, axis.z); 
-        	MathTools.rotate(t, banking, bankaxis.x, bankaxis.y, bankaxis.z);  
-        	
-        	obj.setMatrix(t);
+        Vector3f pos = spline.getPosition(relativePosition);
+        if (tangential == true) {
+            Vector3f pos2 = spline.getPosition(relativePosition + 0.001f);
+
+            Vector3f normal = new Vector3f();
+            normal.x = pos2.x - pos.x;
+            normal.y = pos2.y - pos.y;
+            normal.z = pos2.z - pos.z;
+            normal.normalize();
+
+            Vector3f up = new Vector3f(0.0f, 1.0f, 0.0f);
+            Vector3f upAxis = MathTools.cross(up, normal);
+            upAxis.normalize();
+            float upAngle = MathTools.angle(up, normal);
+
+            Vector3f side = new Vector3f(0.0f, 0.0f, 1.0f);
+            Vector3f sideAxis = MathTools.cross(side, upAxis);
+
+            float len = (float) Math.sqrt(sideAxis.x * sideAxis.x + sideAxis.y * sideAxis.y);
+            if (len == 0.0f) {
+                sideAxis.x = 0.0f;
+                sideAxis.y = -1.0f;
+                sideAxis.z = 0.0f;
+            }
+
+            sideAxis.normalize();
+            float sideAngle = MathTools.angle(side, upAxis);
+
+            Matrix4x4f t = MathTools.initMatrix(1.0f, 0.0f, 0.0f, pos.x,
+                    0.0f, 1.0f, 0.0f, pos.y,
+                    0.0f, 0.0f, 1.0f, pos.z,
+                    0.0f, 0.0f, 0.0f, 1.0f);
+
+            MathTools.rotate(t, (float) Math.toRadians((double) upAngle), upAxis.x, upAxis.y, upAxis.z);
+            MathTools.rotate(t, (float) Math.toRadians((double) sideAngle), sideAxis.x, sideAxis.y, sideAxis.z);
+            MathTools.rotate(t, (float) Math.toRadians(-90.0), axis.x, axis.y, axis.z);
+            MathTools.rotate(t, banking, bankaxis.x, bankaxis.y, bankaxis.z);
+
+            obj.setMatrix(t);
         } else {
-        
-        	Matrix4x4f t = MathTools.initMatrix(1.0f, 0.0f, 0.0f, pos.x,
-        								  		0.0f, 1.0f, 0.0f, pos.y,
-        								  		0.0f, 0.0f, 1.0f, pos.z,
-        								  		0.0f, 0.0f, 0.0f, 1.0f);	
-        	obj.setMatrix(t);
+
+            Matrix4x4f t = MathTools.initMatrix(1.0f, 0.0f, 0.0f, pos.x,
+                    0.0f, 1.0f, 0.0f, pos.y,
+                    0.0f, 0.0f, 1.0f, pos.z,
+                    0.0f, 0.0f, 0.0f, 1.0f);
+            obj.setMatrix(t);
         }
     }
 }

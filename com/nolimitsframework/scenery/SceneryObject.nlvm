@@ -6,96 +6,105 @@ import com.nolimitsframework.transition.*;
 import nlvm.math3d.*;
 import nlvm.util.*;
 
-public class SceneryObject extends Transition implements Process { 
+public class SceneryObject extends Transition implements Process {
+
     static final public int PROPERTY_POSITION = 0;
     static final public int PROPERTY_POSITION_X = 10;
     static final public int PROPERTY_POSITION_Y = 11;
     static final public int PROPERTY_POSITION_Z = 12;
-    
+
     static final public int PROPERTY_ROTATION = 2;
     static final public int PROPERTY_ROTATION_X = 20;
     static final public int PROPERTY_ROTATION_Y = 21;
-    static final public int PROPERTY_ROTATION_Z = 22; 
-    
+    static final public int PROPERTY_ROTATION_Z = 22;
+
     static final public int PROPERTY_SCALE = 3;
     static final public int PROPERTY_SCALE_X = 30;
     static final public int PROPERTY_SCALE_Y = 31;
-    static final public int PROPERTY_SCALE_Z = 32; 
-    
+    static final public int PROPERTY_SCALE_Z = 32;
+
     private String objectName;
     private SceneObject object = null;
-    
+
     // Element properties
     private SceneObjectElement element = null;
     private Vector3f elementPosition = null;
     private Vector3f elementRotation = null;
     private Vector3f elementScale = null;
-    
+
     static private Vector sceneObjectInstances = new Vector();
-    
+
     public SceneryObject(String _name) {
         super();
-        
+
         seekForSceneryObject(_name);
     }
-    
+
     private void initSceneryObject(String _name, bool setProcess) {
         objectName = _name;
-        
+
         object = Framework.getSimulator().getSceneObject(_name);
         //object = SceneryObject.crawlSceneObject(_name);
-        
+
         System.out.println("Crawling Object " + _name);
-        
-        if(object == null) {
+
+        if (object == null) {
             System.err.println("Scenery Object '" + objectName + "' not found");
         } else {
-            if(setProcess == true) Framework.setProcess(this);
+            if (setProcess == true) {
+                Framework.setProcess(this);
+            }
         }
     }
-    
+
     static private SceneObject crawlSceneObject(String _name) {
-    	SceneObject obj = null;
-    	for(int i=0; i < SceneryObject.sceneObjectInstances.size(); i++) {
-    		SceneryObjectInstance instance = (SceneryObjectInstance) SceneryObject.sceneObjectInstances.elementAt(i);
-    		if(instance.name.equals(_name)) {
-            	System.out.println("Scenery Object '" + _name + "' found in cache");
-            	obj = instance.obj;
-            	break;
-    		}
-    	}
-    	if(obj == null) {
-    		obj = Framework.getSimulator().getSceneObject(_name);
-    		if(obj != null) SceneryObject.sceneObjectInstances.addElement(new SceneryObjectInstance(_name, obj));
-    		return obj;
-    	}
-    	return obj;
+        SceneObject obj = null;
+        for (int i = 0; i < SceneryObject.sceneObjectInstances.size(); i++) {
+            SceneryObjectInstance instance = (SceneryObjectInstance) SceneryObject.sceneObjectInstances.elementAt(i);
+            if (instance.name.equals(_name)) {
+                System.out.println("Scenery Object '" + _name + "' found in cache");
+                obj = instance.obj;
+                break;
+            }
+        }
+        if (obj == null) {
+            obj = Framework.getSimulator().getSceneObject(_name);
+            if (obj != null) {
+                SceneryObject.sceneObjectInstances.addElement(new SceneryObjectInstance(_name, obj));
+            }
+            return obj;
+        }
+        return obj;
     }
-    
+
     private void initSceneryElement(String _name) {
-    	if(object == null) return;
-    	
+        if (object == null) {
+            return;
+        }
+
         element = object.getElementForName(_name);
-        
-        if(element == null) {
+
+        if (element == null) {
             System.err.println("Scenery Element '" + _name + "' in '" + objectName + "' not found");
         } else {
             elementPosition = new Vector3f(0.0f, 0.0f, 0.0f);
             elementRotation = new Vector3f(0.0f, 0.0f, 0.0f);
             elementScale = new Vector3f(0.0f, 0.0f, 0.0f);
             Tools.matrixToPitchHeadBankPosScale(element.getMatrix(), elementRotation, elementPosition, elementScale);
-            
+
             Framework.setProcess(this);
         }
     }
-    
+
     public void initForFirstRun() {
-    	if(element != null) Tools.matrixToPitchHeadBankPosScale(element.getMatrix(), elementRotation, elementPosition, elementScale);
+        if (element != null) {
+            Tools.matrixToPitchHeadBankPosScale(element.getMatrix(), elementRotation, elementPosition, elementScale);
+        }
     }
-    
+
     private String trim(String in) {
         String str = in;
-        
+
         while (str.charAt(0) == ' ') {
             str = str.substring(1, str.length());
         }
@@ -104,209 +113,248 @@ public class SceneryObject extends Transition implements Process {
         }
         return str;
     }
-    
+
     public void seekForSceneryObject(String _name) {
         Vector matches = new Vector();
         matches.addElement(new StringBuilder());
-        
-        for(int i=0; i < _name.length(); i++) {
+
+        for (int i = 0; i < _name.length(); i++) {
             char c = _name.charAt(i);
-            if(c == ',') {
+            if (c == ',') {
                 matches.addElement(new StringBuilder());
             } else {
-                StringBuilder cs = (StringBuilder)matches.elementAt(matches.size()-1);
+                StringBuilder cs = (StringBuilder) matches.elementAt(matches.size() - 1);
                 cs.append(c);
             }
         }
-        
-        for(int i=0; i < matches.size(); i++) {
-            StringBuilder cs = (StringBuilder)matches.elementAt(i);
+
+        for (int i = 0; i < matches.size(); i++) {
+            StringBuilder cs = (StringBuilder) matches.elementAt(i);
             String name = trim(cs.toString());
-            
+
             // Scenery Object
-            if(i == 0) initSceneryObject(name, matches.size()==1?true:false );
-            else initSceneryElement(name);
+            if (i == 0) {
+                initSceneryObject(name, matches.size() == 1 ? true : false);
+            } else {
+                initSceneryElement(name);
+            }
         }
-        
+
     }
 
     public float getProperty(int parameter) {
-        if(element != null) return getPropertyForElement(parameter);
-        else return getPropertyForObject(parameter);
+        if (element != null) {
+            return getPropertyForElement(parameter);
+        } else {
+            return getPropertyForObject(parameter);
+        }
     }
-    
+
     public void setProperty(int parameter, float value) {
-        if(element != null) setPropertyForElement(parameter, value);
-        else setPropertyForObject(parameter, value);
+        if (element != null) {
+            setPropertyForElement(parameter, value);
+        } else {
+            setPropertyForObject(parameter, value);
+        }
     }
-    
+
     public float getPropertyForObject(int parameter) {
-        if(parameter == PROPERTY_POSITION_X) return object.getTranslation().x;
-        if(parameter == PROPERTY_POSITION_Y) return object.getTranslation().y;
-        if(parameter == PROPERTY_POSITION_Z) return object.getTranslation().z;
-        
-        if(parameter == PROPERTY_ROTATION_X) {
+        if (parameter == PROPERTY_POSITION_X) {
+            return object.getTranslation().x;
+        }
+        if (parameter == PROPERTY_POSITION_Y) {
+            return object.getTranslation().y;
+        }
+        if (parameter == PROPERTY_POSITION_Z) {
+            return object.getTranslation().z;
+        }
+
+        if (parameter == PROPERTY_ROTATION_X) {
             Vector3f t = new Vector3f();
             object.getRotation(t);
             return t.x;
-        } 
-        if(parameter == PROPERTY_ROTATION_Y) {
+        }
+        if (parameter == PROPERTY_ROTATION_Y) {
             Vector3f t = new Vector3f();
             object.getRotation(t);
             return t.y;
-        } 
-        if(parameter == PROPERTY_ROTATION_Z) {
+        }
+        if (parameter == PROPERTY_ROTATION_Z) {
             Vector3f t = new Vector3f();
             object.getRotation(t);
             return t.z;
-        } 
-        
-        if(parameter == PROPERTY_SCALE_X) {
+        }
+
+        if (parameter == PROPERTY_SCALE_X) {
             Vector3f t = new Vector3f();
             object.getScale(t);
             return t.x;
-        } 
-        if(parameter == PROPERTY_SCALE_Y) {
+        }
+        if (parameter == PROPERTY_SCALE_Y) {
             Vector3f t = new Vector3f();
             object.getScale(t);
             return t.y;
-        } 
-        if(parameter == PROPERTY_SCALE_Z) {
+        }
+        if (parameter == PROPERTY_SCALE_Z) {
             Vector3f t = new Vector3f();
             object.getScale(t);
             return t.z;
-        } 
+        }
         return 0.0f;
     }
-    
+
     public void setPropertyForObject(int parameter, float value) {
-        if(parameter == PROPERTY_POSITION_X) {
+        if (parameter == PROPERTY_POSITION_X) {
             Vector3f t = object.getTranslation();
             object.setTranslation(value, t.y, t.z);
         }
-        if(parameter == PROPERTY_POSITION_Y) {
+        if (parameter == PROPERTY_POSITION_Y) {
             Vector3f t = object.getTranslation();
             object.setTranslation(t.x, value, t.z);
         }
-        if(parameter == PROPERTY_POSITION_Z) {
+        if (parameter == PROPERTY_POSITION_Z) {
             Vector3f t = object.getTranslation();
             object.setTranslation(t.x, t.y, value);
         }
-        
-        if(parameter == PROPERTY_ROTATION_X) {
+
+        if (parameter == PROPERTY_ROTATION_X) {
             Vector3f t = new Vector3f();
             object.getRotation(t);
             object.setRotation(value, t.y, t.z);
         }
-        if(parameter == PROPERTY_ROTATION_Y) {
+        if (parameter == PROPERTY_ROTATION_Y) {
             Vector3f t = new Vector3f();
             object.getRotation(t);
             object.setRotation(t.x, value, t.z);
         }
-        if(parameter == PROPERTY_ROTATION_Z) {
+        if (parameter == PROPERTY_ROTATION_Z) {
             Vector3f t = new Vector3f();
             object.getRotation(t);
             object.setRotation(t.x, t.y, value);
         }
-        
-        if(parameter == PROPERTY_SCALE_X) {
+
+        if (parameter == PROPERTY_SCALE_X) {
             Vector3f t = new Vector3f();
             object.getScale(t);
             object.setScale(value, t.y, t.z);
         }
-        if(parameter == PROPERTY_SCALE_Y) {
+        if (parameter == PROPERTY_SCALE_Y) {
             Vector3f t = new Vector3f();
             object.getScale(t);
             object.setScale(t.x, value, t.z);
         }
-        if(parameter == PROPERTY_SCALE_Z) {
+        if (parameter == PROPERTY_SCALE_Z) {
             Vector3f t = new Vector3f();
             object.getScale(t);
             object.setScale(t.x, t.y, value);
         }
     }
 
-    
     public float getPropertyForElement(int parameter) {
-        if(parameter == PROPERTY_POSITION_X) return elementPosition.x;
-        if(parameter == PROPERTY_POSITION_Y) return elementPosition.y;
-        if(parameter == PROPERTY_POSITION_Z) return elementPosition.z;
-        
-        if(parameter == PROPERTY_ROTATION_X) return elementRotation.x;
-        if(parameter == PROPERTY_ROTATION_Y) return elementRotation.y;
-        if(parameter == PROPERTY_ROTATION_Z) return elementRotation.z;
-        
-        if(parameter == PROPERTY_SCALE_X) return elementScale.x;
-        if(parameter == PROPERTY_SCALE_Y) return elementScale.y;
-        if(parameter == PROPERTY_SCALE_Z) return elementScale.z;
-        
+        if (parameter == PROPERTY_POSITION_X) {
+            return elementPosition.x;
+        }
+        if (parameter == PROPERTY_POSITION_Y) {
+            return elementPosition.y;
+        }
+        if (parameter == PROPERTY_POSITION_Z) {
+            return elementPosition.z;
+        }
+
+        if (parameter == PROPERTY_ROTATION_X) {
+            return elementRotation.x;
+        }
+        if (parameter == PROPERTY_ROTATION_Y) {
+            return elementRotation.y;
+        }
+        if (parameter == PROPERTY_ROTATION_Z) {
+            return elementRotation.z;
+        }
+
+        if (parameter == PROPERTY_SCALE_X) {
+            return elementScale.x;
+        }
+        if (parameter == PROPERTY_SCALE_Y) {
+            return elementScale.y;
+        }
+        if (parameter == PROPERTY_SCALE_Z) {
+            return elementScale.z;
+        }
+
         return 0.0f;
     }
-    
+
     public void setPropertyForElement(int parameter, float value) {
-        if(parameter == PROPERTY_POSITION_X) {
+        if (parameter == PROPERTY_POSITION_X) {
             elementPosition.x = value;
             element.setTranslation(elementPosition);
         }
-        if(parameter == PROPERTY_POSITION_Y) {
+        if (parameter == PROPERTY_POSITION_Y) {
             elementPosition.y = value;
             element.setTranslation(elementPosition);
         }
-        if(parameter == PROPERTY_POSITION_Z) {
+        if (parameter == PROPERTY_POSITION_Z) {
             elementPosition.z = value;
             element.setTranslation(elementPosition);
         }
-        
-        if(parameter == PROPERTY_ROTATION_X) {
+
+        if (parameter == PROPERTY_ROTATION_X) {
             elementRotation.x = value;
             element.setRotation(elementRotation);
         }
-        if(parameter == PROPERTY_ROTATION_Y) {
+        if (parameter == PROPERTY_ROTATION_Y) {
             elementRotation.y = value;
             element.setRotation(elementRotation);
         }
-        if(parameter == PROPERTY_ROTATION_Z) {
+        if (parameter == PROPERTY_ROTATION_Z) {
             elementRotation.z = value;
             element.setRotation(elementRotation);
         }
-        
-        if(parameter == PROPERTY_SCALE_X) {
+
+        if (parameter == PROPERTY_SCALE_X) {
             elementScale.x = value;
             element.setScale(elementScale);
         }
-        if(parameter == PROPERTY_SCALE_Y) {
+        if (parameter == PROPERTY_SCALE_Y) {
             elementScale.y = value;
             element.setScale(elementScale);
         }
-        if(parameter == PROPERTY_SCALE_Z) {
+        if (parameter == PROPERTY_SCALE_Z) {
             elementRotation.z = value;
             element.setScale(elementScale);
         }
     }
-    
+
     public void setMatrix(Matrix4x4f m) {
-    	if(element != null) {
-    		elementPosition = m.getTrans();
-    		element.setMatrix(m);
-    	}
-    	else object.setMatrix(m);
+        if (element != null) {
+            elementPosition = m.getTrans();
+            element.setMatrix(m);
+        } else {
+            object.setMatrix(m);
+        }
     }
-    
+
     public Matrix4x4f getMatrix() {
-    	if(element != null) return element.getMatrix();
-    	else return object.getMatrix();
+        if (element != null) {
+            return element.getMatrix();
+        } else {
+            return object.getMatrix();
+        }
     }
-    
+
     public SceneObjectElement getElement() {
         return element;
     }
-    
+
     public SceneObject getObject() {
         return object;
     }
-    
+
     public Object getNativeObject() {
-    	if(element != null) return getElement();
-    	else return getObject();
+        if (element != null) {
+            return getElement();
+        } else {
+            return getObject();
+        }
     }
 }

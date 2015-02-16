@@ -1,50 +1,51 @@
 package com.nolimitsframework.easing;
 
 public class Easing {
+
     static final public int QUAD_IN = 0;
     static final public int QUAD_OUT = 1;
     static final public int QUAD_IN_OUT = 2;
-    
+
     static final public int CUBIC_IN = 3;
     static final public int CUBIC_OUT = 4;
     static final public int CUBIC_IN_OUT = 5;
-    
+
     static final public int QUART_IN = 6;
     static final public int QUART_OUT = 7;
     static final public int QUART_IN_OUT = 8;
-    
+
     static final public int QUINT_IN = 9;
     static final public int QUINT_OUT = 10;
     static final public int QUINT_IN_OUT = 11;
-    
+
     static final public int SINE_IN = 12;
     static final public int SINE_OUT = 13;
     static final public int SINE_IN_OUT = 14;
-    
+
     static final public int EXPO_IN = 15;
     static final public int EXPO_OUT = 16;
     static final public int EXPO_IN_OUT = 17;
-    
+
     static final public int CIRC_IN = 18;
     static final public int CIRC_OUT = 19;
     static final public int CIRC_IN_OUT = 20;
-    
+
     static final public int ELASTIC_IN = 21;
     static final public int ELASTIC_OUT = 22;
     static final public int ELASTIC_IN_OUT = 23;
-    
+
     static final public int BACK_IN = 24;
     static final public int BACK_OUT = 25;
     static final public int BACK_IN_OUT = 26;
-    
+
     static final public int LINEAR = 27;
-    
-    public double getValue(double t,double b, double c, double d) {
-            return 0.0;
+
+    public double getValue(double t, double b, double c, double d) {
+        return 0.0;
     }
-    
+
     static public Easing getEasing(int easing) {
-        switch(easing) {
+        switch (easing) {
             case QUAD_IN:
                 return new EaseInQuad();
             case QUAD_OUT:

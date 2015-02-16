@@ -1,7 +1,8 @@
 package com.nolimitsframework.easing;
 
 public class EaseInSine extends Easing {
-    public double getValue(double t,double b, double c, double d) {
-        return -c * Math.cos(t/d * (Math.PI/2)) + c + b;
+
+    public double getValue(double t, double b, double c, double d) {
+        return -c * Math.cos(t / d * (Math.PI / 2)) + c + b;
     }
 }

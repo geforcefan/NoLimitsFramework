@@ -12,183 +12,185 @@ import com.nolimitsframework.util.*;
 import com.nolimitscoaster.*;
 import nlvm.util.*;
 
-public class IntaminCableLift extends Constraint implements Process, BlockObject  {
+public class IntaminCableLift extends Constraint implements Process, BlockObject {
+
     private String catchCar = null;
     private int numCatchCars = 0;
     private Spline spline = null;
-    
+
     private float currentOffset = 0.0f;
     private float startOffset = 0.0f;
-    
+
     private float length = 0.0f;
-    
+
     private Vector distancesCatchCar;
     private Vector alignObjects;
     private Vector soObjects;
     private Vector growthObjects;
     private Vector growthSplineAlignMapping;
-    
+
     private Train train = null;
-    
+
     private bool runMode = false;
-    
-    
-	public IntaminCableLift(
-	    String _catchCar,
-	    Spline _spline) {
+
+    public IntaminCableLift(
+            String _catchCar,
+            Spline _spline) {
         super();
-        
+
         distancesCatchCar = new Vector();
         alignObjects = new Vector();
         soObjects = new Vector();
-        
+
         growthObjects = new Vector();
-        growthSplineAlignMapping= new Vector();
-        
+        growthSplineAlignMapping = new Vector();
+
         catchCar = _catchCar;
         spline = _spline;
-        
+
         Vector ccStrings = StringTools.split(',', _catchCar);
-        SceneryObject ccObject = new SceneryObject(((StringBuilder)ccStrings.elementAt(0)).toString());
-        
-        if(ccStrings.size() < 2) {
+        SceneryObject ccObject = new SceneryObject(((StringBuilder) ccStrings.elementAt(0)).toString());
+
+        if (ccStrings.size() < 2) {
             System.err.println("Invalid catch car syntax. Valid Format: 'Object name, prefix'");
             return;
         }
-        
-        for(int i=0; i < ccObject.getObject().getElementCount(); i++) {
-            if(ccObject.getObject().getElementAt(i).getName().startsWith(StringTools.trim(((StringBuilder)ccStrings.elementAt(1)).toString())) == true) {
+
+        for (int i = 0; i < ccObject.getObject().getElementCount(); i++) {
+            if (ccObject.getObject().getElementAt(i).getName().startsWith(StringTools.trim(((StringBuilder) ccStrings.elementAt(1)).toString())) == true) {
                 numCatchCars++;
             }
         }
-        
+
         length = spline.getLength();
-        
-        for(int i=0; i < numCatchCars; i++) {
+
+        for (int i = 0; i < numCatchCars; i++) {
             StringBuilder sb = new StringBuilder();
             sb.append(catchCar);
             sb.append(i);
-            
+
             SceneryObject so = new SceneryObject(sb.toString());
-            
+
             float px = so.getProperty(SceneryObject.PROPERTY_POSITION_X);
             AlignToSpline alignSpline = new AlignToSpline(spline, false);
-            
-            if(i == 0) {
+
+            if (i == 0) {
                 startOffset = 0.0f;
                 currentOffset = startOffset;
             }
-            
+
             float diff = spline.getOffsetByLength(px);
             distancesCatchCar.addElement(new Float(diff));
-            
+
             so.attachConstraint(alignSpline);
-            
+
             soObjects.addElement(so);
             alignObjects.addElement(alignSpline);
             alignSpline.setProperty(AlignToSpline.PROPERTY_POSITION_RELATIVE, 0.0f);
         }
-        
-        for(int i=0; i < soObjects.size() - 1; i++) {
-            SceneryObject so = (SceneryObject)soObjects.elementAt(i);
-            SceneryObject son = (SceneryObject)soObjects.elementAt(i+1);
+
+        for (int i = 0; i < soObjects.size() - 1; i++) {
+            SceneryObject so = (SceneryObject) soObjects.elementAt(i);
+            SceneryObject son = (SceneryObject) soObjects.elementAt(i + 1);
             so.attachConstraint(new LookAt(son));
         }
-        
-        for(int i=0; i < alignObjects.size(); i++) {
-            Float distances = (Float)distancesCatchCar.elementAt(i);
-            AlignToSpline ats = (AlignToSpline)alignObjects.elementAt(i);
+
+        for (int i = 0; i < alignObjects.size(); i++) {
+            Float distances = (Float) distancesCatchCar.elementAt(i);
+            AlignToSpline ats = (AlignToSpline) alignObjects.elementAt(i);
             ats.setProperty(AlignToSpline.PROPERTY_POSITION_RELATIVE, currentOffset + distances.getValue());
         }
-        
+
         Framework.setProcess(this);
-	}
-	
-	public void setRunMode(bool mode) {
+    }
+
+    public void setRunMode(bool mode) {
         currentOffset = startOffset;
-	    runMode = mode;
-	}
-	
-	public void setBackwardMode() {
-        for(int i=0; i < alignObjects.size(); i++) {
-            AlignToSpline ats = (AlignToSpline)alignObjects.elementAt(i);
-            Float distances = (Float)distancesCatchCar.elementAt(i);
-            
+        runMode = mode;
+    }
+
+    public void setBackwardMode() {
+        for (int i = 0; i < alignObjects.size(); i++) {
+            AlignToSpline ats = (AlignToSpline) alignObjects.elementAt(i);
+            Float distances = (Float) distancesCatchCar.elementAt(i);
+
             ats.setAnimationProperty(AlignToSpline.PROPERTY_POSITION_RELATIVE, startOffset + distances.getValue());
             ats.animate(50, Easing.QUINT_IN_OUT);
         }
-	}
-    
+    }
+
     public void proceed(float tick) {
-        if(train == null) return;
-        if(runMode == true) {
-            float aOffset = (((float)train.getSpeed() * tick) / 1.0f)/length;
-            
+        if (train == null) {
+            return;
+        }
+        if (runMode == true) {
+            float aOffset = (((float) train.getSpeed() * tick) / 1.0f) / length;
+
             currentOffset += aOffset;
-            float lastOffset = currentOffset + ((Float)distancesCatchCar.elementAt(distancesCatchCar.size() - 1)).getValue();
-            
-            if(lastOffset > 1.0f) {
+            float lastOffset = currentOffset + ((Float) distancesCatchCar.elementAt(distancesCatchCar.size() - 1)).getValue();
+
+            if (lastOffset > 1.0f) {
                 runMode = false;
                 setBackwardMode();
                 return;
             }
-            
-            for(int i=0; i < alignObjects.size(); i++) {
-                Float distances = (Float)distancesCatchCar.elementAt(i);
-                AlignToSpline ats = (AlignToSpline)alignObjects.elementAt(i);
+
+            for (int i = 0; i < alignObjects.size(); i++) {
+                Float distances = (Float) distancesCatchCar.elementAt(i);
+                AlignToSpline ats = (AlignToSpline) alignObjects.elementAt(i);
                 ats.setProperty(AlignToSpline.PROPERTY_POSITION_RELATIVE, currentOffset + distances.getValue());
             }
         }
     }
-	
+
     public bool isInitSuccessfully() {
         return true;
     }
-	
-	public void stateChanged(int state, Block block) {
-	    if(state == Block.STATE_BLOCK_LEAVING) {
-	        train = block.getNativeBlock().getSection().getTrainOnSection();
-	        setRunMode(true);
-	    }
-	}
-	
-	public void attachCable(String cableObject, float division, bool backward) {
+
+    public void stateChanged(int state, Block block) {
+        if (state == Block.STATE_BLOCK_LEAVING) {
+            train = block.getNativeBlock().getSection().getTrainOnSection();
+            setRunMode(true);
+        }
+    }
+
+    public void attachCable(String cableObject, float division, bool backward) {
         Vector coStrings = StringTools.split(',', cableObject);
-        if(coStrings.size() < 2) {
+        if (coStrings.size() < 2) {
             System.err.println("Invalid cable object syntax. Valid Format: 'Object name, prefix'");
             return;
         }
-        
+
         SceneryObject sobject = new SceneryObject(coStrings.elementAt(0).toString());
         Growth growth = new Growth(StringTools.trim(coStrings.elementAt(1).toString()), division, backward);
-        
-        if(backward == true) {
-            AlignToSpline atso = (AlignToSpline)alignObjects.elementAt(alignObjects.size()-1);
+
+        if (backward == true) {
+            AlignToSpline atso = (AlignToSpline) alignObjects.elementAt(alignObjects.size() - 1);
             atso.attachConstraint(this, true);
-            growthSplineAlignMapping.addElement(new Int(alignObjects.size()-1));
+            growthSplineAlignMapping.addElement(new Int(alignObjects.size() - 1));
         } else {
-            AlignToSpline atso = (AlignToSpline)alignObjects.elementAt(0);
+            AlignToSpline atso = (AlignToSpline) alignObjects.elementAt(0);
             atso.attachConstraint(this, true);
             growthSplineAlignMapping.addElement(new Int(0));
         }
-        
+
         sobject.attachConstraint(growth);
         growthObjects.addElement(growth);
-	}
-	
-	public void attachCable(String cableObject, float division) {
-	    attachCable(cableObject, division, false);
-	}
-    
-	public void onChange(Transition _obj) {
-	    for(int i=0; i < growthObjects.size(); i++) {
-            Growth growth = (Growth)growthObjects.elementAt(i);
-            AlignToSpline ats = (AlignToSpline)alignObjects.elementAt(((Int)growthSplineAlignMapping.elementAt(i)).getValue());
-            
+    }
+
+    public void attachCable(String cableObject, float division) {
+        attachCable(cableObject, division, false);
+    }
+
+    public void onChange(Transition _obj) {
+        for (int i = 0; i < growthObjects.size(); i++) {
+            Growth growth = (Growth) growthObjects.elementAt(i);
+            AlignToSpline ats = (AlignToSpline) alignObjects.elementAt(((Int) growthSplineAlignMapping.elementAt(i)).getValue());
+
             float relPos = ats.getProperty(AlignToSpline.PROPERTY_POSITION_RELATIVE);
             float absPos = (length * relPos) / 1.0f;
-            
+
             growth.setProperty(Growth.PROPERTY_GROWTH_OFFSET, absPos);
-	    }
-	}
+        }
+    }
 }

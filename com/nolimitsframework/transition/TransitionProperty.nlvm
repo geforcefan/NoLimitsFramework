@@ -1,9 +1,10 @@
 package com.nolimitsframework.transition;
 
 public class TransitionProperty {
+
     public int parameter;
     public float value;
-    
+
     public TransitionProperty(int _parameter, float _value) {
         parameter = _parameter;
         value = _value;

@@ -5,48 +5,49 @@ import com.nolimitsframework.*;
 
 import nlvm.math3d.*;
 
-public class AttachTo extends Constraint implements Process  {
+public class AttachTo extends Constraint implements Process {
+
     static final public int PROPERTY_POSITION = 0;
     static final public int PROPERTY_POSITION_X = 10;
     static final public int PROPERTY_POSITION_Y = 11;
-    static final public int PROPERTY_POSITION_Z = 12; 
-    
-	private Transition attachObj = null;
-	private bool tangential = false;
-	
+    static final public int PROPERTY_POSITION_Z = 12;
+
+    private Transition attachObj = null;
+    private bool tangential = false;
+
     public String getName() {
         return "AttachTo";
     }
-    
-	public void onChange(Transition _obj) {
-		if(tangential == false) {
-			Vector3f pos = new Vector3f(attachObj.getProperty(PROPERTY_POSITION_X),
-										attachObj.getProperty(PROPERTY_POSITION_Y),
-										attachObj.getProperty(PROPERTY_POSITION_Z));		
-		
-			obj.setProperty(PROPERTY_POSITION_X, pos.x);
-			obj.setProperty(PROPERTY_POSITION_Y, pos.y);
-			obj.setProperty(PROPERTY_POSITION_Z, pos.z);
-		} else {
-			Matrix4x4f m = attachObj.getMatrix();
-			obj.setMatrix(m);
-		}
-	}
-	
-	public void AttachToInit(Transition _attachObj, bool _tangential) {
-		attachObj = _attachObj;
-		tangential = _tangential;
-		
-		attachObj.attachConstraint(this);
-	}	
-	
-	public AttachTo(Transition _attachObj, bool _tangential) {
+
+    public void onChange(Transition _obj) {
+        if (tangential == false) {
+            Vector3f pos = new Vector3f(attachObj.getProperty(PROPERTY_POSITION_X),
+                    attachObj.getProperty(PROPERTY_POSITION_Y),
+                    attachObj.getProperty(PROPERTY_POSITION_Z));
+
+            obj.setProperty(PROPERTY_POSITION_X, pos.x);
+            obj.setProperty(PROPERTY_POSITION_Y, pos.y);
+            obj.setProperty(PROPERTY_POSITION_Z, pos.z);
+        } else {
+            Matrix4x4f m = attachObj.getMatrix();
+            obj.setMatrix(m);
+        }
+    }
+
+    public void AttachToInit(Transition _attachObj, bool _tangential) {
+        attachObj = _attachObj;
+        tangential = _tangential;
+
+        attachObj.attachConstraint(this);
+    }
+
+    public AttachTo(Transition _attachObj, bool _tangential) {
         super();
-		AttachToInit(_attachObj, _tangential);
-	}
-	
-	public AttachTo(Transition _attachObj) {
+        AttachToInit(_attachObj, _tangential);
+    }
+
+    public AttachTo(Transition _attachObj) {
         super();
-		AttachToInit(_attachObj, false);
-	}
+        AttachToInit(_attachObj, false);
+    }
 }

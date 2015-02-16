@@ -5,12 +5,13 @@ import nlvm.util.*;
 import com.nolimitsframework.objects.*;
 
 public class Block {
+
     public String name;
     protected BlockManager mngr;
-    
+
     protected com.nolimitscoaster.Block nativeBlock;
     protected Block nextBlock;
-    
+
     // Block states
     public static final int STATE_BLOCK_FREE = 0;
     public static final int STATE_BLOCK_APPROACHING = 1;
@@ -24,37 +25,37 @@ public class Block {
     public static final int STATE_BLOCK_APPROACHING_B = 9;
     public static final int STATE_BLOCK_LEAVING_B = 10;
     public static final int STATE_BLOCK_BEFORE_TRIGGER_B = 11;
-    
+
     public static final int DIRECTION_LEFT = 0;
     public static final int DIRECTION_RIGHT = 1;
-    
+
     protected Vector objects = null;
-    
+
     public void setNextBlock(Block b) {
         nextBlock = b;
     }
-    
+
     public com.nolimitscoaster.Block getNativeBlock() {
         return nativeBlock;
     }
-    
+
     public bool init(BlockManager _mngr) {
         mngr = _mngr;
         nativeBlock = mngr.coaster.getBlock(name);
-        
-        if(nativeBlock == null) {
+
+        if (nativeBlock == null) {
             System.err.println("Block '" + name + "' not found");
             return false;
         }
-        
+
         registerBlockStates();
         setInitialBlockState();
-        
+
         nativeBlock.setAdvanceFwdVisible(true);
-        
+
         return initChild();
     }
-    
+
     private void registerBlockStates() {
         nativeBlock.registerState(STATE_BLOCK_FREE, "Free", com.nolimitscoaster.Block.LAMP_OFF);
         nativeBlock.registerState(STATE_BLOCK_APPROACHING, "Approaching", com.nolimitscoaster.Block.LAMP_FLASHING);
@@ -69,7 +70,7 @@ public class Block {
         nativeBlock.registerState(STATE_BLOCK_WAIT_FOR_ADVANCE, "Waiting for Advance", com.nolimitscoaster.Block.LAMP_ON);
         nativeBlock.registerState(STATE_BLOCK_IN_STATION, "In Station", com.nolimitscoaster.Block.LAMP_ON);
     }
-    
+
     public void setInitialBlockState() {
         if (nativeBlock.getNumberOfTrainsOnBlock() > 0) {
             if (nativeBlock.getSection().iStation()) {
@@ -81,33 +82,38 @@ public class Block {
             nativeBlock.setState(STATE_BLOCK_FREE);
         }
     }
-    
+
     public bool prepareBlockEntering() {
         if (nativeBlock.getState() == STATE_BLOCK_FREE) {
             return true;
         }
         return false;
     }
-    
-        
+
     public void updateControlPanel() {
         nativeBlock.setAdvanceFwdEnabled(nativeBlock.getState() == STATE_BLOCK_WAIT_FOR_ADVANCE && nextBlock.prepareBlockEntering());
     }
-    
-    public void proceed(float tick) {}
-    public bool initChild() {
-            return true;
+
+    public void proceed(float tick) {
     }
-    
+
+    public bool initChild() {
+        return true;
+    }
+
     public void attachObject(BlockObject obj) {
-        if(objects == null) objects = new Vector();
+        if (objects == null) {
+            objects = new Vector();
+        }
         objects.addElement(obj);
     }
-    
+
     public void stateChanged(int state) {
-        if(objects == null) objects = new Vector();
-        for(int i=0; i < objects.size(); i++) {
-            BlockObject obj = (BlockObject)objects.elementAt(i);
+        if (objects == null) {
+            objects = new Vector();
+        }
+        for (int i = 0; i < objects.size(); i++) {
+            BlockObject obj = (BlockObject) objects.elementAt(i);
             obj.stateChanged(state, this);
         }
     }

@@ -3,12 +3,13 @@ package com.nolimitsframework.animation;
 import com.nolimitsframework.transition.*;
 
 public class AnimationItem {
+
     public TransitionProperty property;
     public float startTime;
     public float duration;
     public int easing;
     public bool isRunning = false;
-    
+
     public AnimationItem(TransitionProperty _property, float _startTime, float _duration, int _easing) {
         property = _property;
         startTime = _startTime;

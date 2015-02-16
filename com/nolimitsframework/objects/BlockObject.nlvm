@@ -3,5 +3,6 @@ package com.nolimitsframework.objects;
 import com.nolimitsframework.block.*;
 
 interface BlockObject {
-	abstract public void stateChanged(int state, Block block);
+
+    abstract public void stateChanged(int state, Block block);
 }

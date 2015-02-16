@@ -5,115 +5,123 @@ import com.nolimitsframework.*;
 import nlvm.util.*;
 
 public class BlockManager implements Process, BlockSystemController {
+
     public bool bIsInitSuccessfully;
-    
+
     public Coaster coaster;
-    
+
     public static final int AUTO_MODE = 0;
     public static final int MANUAL_BLOCK_MODE = 1;
     public static final int FULL_MANUAL_MODE = 2;
-    
+
     public int mode;
-    
+
     private Vector blocks;
-    
+
     public BlockManager() {
         coaster = Framework.getCurrentCoaster();
-        
-        if(coaster == null) {
+
+        if (coaster == null) {
             bIsInitSuccessfully = false;
             System.err.println("This script is not attached to a coaster. If you want to specify the coaster by name, just use BlockManager::BlockManager(String coastername).");
             return;
-        } else bIsInitSuccessfully = true;
-        
+        } else {
+            bIsInitSuccessfully = true;
+        }
+
         initBlock();
         Framework.setProcess(this);
     }
-    
+
     public BlockManager(String coastername) {
         coaster = Framework.mainScript.getSimulator().getCoaster(coastername);
-        
-        if(coaster == null) {
+
+        if (coaster == null) {
             bIsInitSuccessfully = false;
             System.err.println("Your specified coaster '" + coastername + "' is not found.");
             return;
-        } else bIsInitSuccessfully = true;
-        
+        } else {
+            bIsInitSuccessfully = true;
+        }
+
         initBlock();
         Framework.setProcess(this);
     }
-    
+
     public void initBlock() {
         blocks = new Vector();
         coaster.setBlockSystemController(this);
         mode = AUTO_MODE;
     }
-    
+
     public void setBlock(Block block) {
         bool success = block.init(this);
-        if(success == true) {
-            System.out.println("Block '" + block.name    + "' found. Setting block to the block manager process list");
-            
-            if(blocks.size() > 0) {
-                Block cblock = (Block)blocks.elementAt(blocks.size() - 1);
-                Block fblock = (Block)blocks.elementAt(0);
-                
+        if (success == true) {
+            System.out.println("Block '" + block.name + "' found. Setting block to the block manager process list");
+
+            if (blocks.size() > 0) {
+                Block cblock = (Block) blocks.elementAt(blocks.size() - 1);
+                Block fblock = (Block) blocks.elementAt(0);
+
                 cblock.setNextBlock(block);
                 block.setNextBlock(fblock);
-                
+
                 System.out.println("Setting nextBlock to '" + block.name + "' for '" + cblock.name + "'");
                 System.out.println("Setting nextBlock to '" + fblock.name + "' for '" + block.name + "'");
             }
             blocks.addElement(block);
         }
     }
-    
+
     public bool isInitSuccessfully() {
         return bIsInitSuccessfully;
     }
-    
+
     public void onAutoMode(Coaster c) {
         if (mode == FULL_MANUAL_MODE) {
-            for(int i=0; i < blocks.size(); i++) {
-                Block block = (Block)blocks.elementAt(i);
+            for (int i = 0; i < blocks.size(); i++) {
+                Block block = (Block) blocks.elementAt(i);
                 block.setInitialBlockState();
                 block.updateControlPanel();
             }
         }
         mode = AUTO_MODE;
     }
-    
+
     public void onManualBlockMode(Coaster c) {
         if (mode == FULL_MANUAL_MODE) {
-            for(int i=0; i < blocks.size(); i++) {
-                Block block = (Block)blocks.elementAt(i);
+            for (int i = 0; i < blocks.size(); i++) {
+                Block block = (Block) blocks.elementAt(i);
                 block.setInitialBlockState();
                 block.updateControlPanel();
             }
         }
         mode = MANUAL_BLOCK_MODE;
     }
-    
+
     public void onFullManualMode(Coaster c) {
         mode = FULL_MANUAL_MODE;
-        for(int i=0; i < blocks.size(); i++) {
-            Block block = (Block)blocks.elementAt(i);
+        for (int i = 0; i < blocks.size(); i++) {
+            Block block = (Block) blocks.elementAt(i);
             block.updateControlPanel();
         }
     }
-    
-    public void onAdvanceFWDButton(com.nolimitscoaster.Block block) {}
-    public void onAdvanceBWDButton(com.nolimitscoaster.Block block) {}
-    
+
+    public void onAdvanceFWDButton(com.nolimitscoaster.Block block) {
+    }
+
+    public void onAdvanceBWDButton(com.nolimitscoaster.Block block) {
+    }
+
     public void proceed(float tick) {
         if (mode != FULL_MANUAL_MODE) {
-            for(int i=0; i < blocks.size(); i++) {
-                Block block = (Block)blocks.elementAt(i);
+            for (int i = 0; i < blocks.size(); i++) {
+                Block block = (Block) blocks.elementAt(i);
                 block.proceed(tick);
             }
             if (mode == MANUAL_BLOCK_MODE) {
-                for(int i=0; i < blocks.size(); i++) {
-                    Block block = (Block)blocks.elementAt(i);
+                for (int i = 0; i < blocks.size(); i++) {
+                    Block block = (Block) blocks.elementAt(i);
                     block.updateControlPanel();
                 }
             }

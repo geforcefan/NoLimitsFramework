@@ -8,76 +8,82 @@ import com.nolimitscoaster.*;
 import nlvm.math3d.*;
 import nlvm.util.*;
 
-public class Growth extends Constraint implements Process  {
+public class Growth extends Constraint implements Process {
+
     static final public int PROPERTY_GROWTH_OFFSET = 140;
-    
+
     private float division;
     private bool isOffsetStartPoint;
     private String prefix;
-    
+
     private float growthOffset = 0.0f;
-    
+
     private Vector growthElements = null;
-    
+
     public String getName() {
         return "Growth";
     }
-	
-	private void update() {
-	    int indices = (int)Math.floor(growthOffset / division);
-	    
-	    for(int i=0; i < growthElements.size(); i++) {
-            SceneObjectElement soe = (SceneObjectElement)growthElements.elementAt(i);
-            
-            if(isOffsetStartPoint == true) {
-                if(i < indices) {
-                    soe.setVisible(false);    
+
+    private void update() {
+        int indices = (int) Math.floor(growthOffset / division);
+
+        for (int i = 0; i < growthElements.size(); i++) {
+            SceneObjectElement soe = (SceneObjectElement) growthElements.elementAt(i);
+
+            if (isOffsetStartPoint == true) {
+                if (i < indices) {
+                    soe.setVisible(false);
                 } else {
                     soe.setVisible(true);
                 }
-	        } else {
-	            if(i < indices) {
-                    soe.setVisible(true);    
+            } else {
+                if (i < indices) {
+                    soe.setVisible(true);
                 } else {
                     soe.setVisible(false);
                 }
             }
-	    }
-	}
-	
-    public float getProperty(int parameter) { 
-        if(parameter == Growth.PROPERTY_GROWTH_OFFSET) {
+        }
+    }
+
+    public float getProperty(int parameter) {
+        if (parameter == Growth.PROPERTY_GROWTH_OFFSET) {
             return growthOffset;
         }
         return 0.0f;
     }
+
     public void setProperty(int parameter, float value) {
-        if(parameter == Growth.PROPERTY_GROWTH_OFFSET) {
+        if (parameter == Growth.PROPERTY_GROWTH_OFFSET) {
             growthOffset = value;
         }
         update();
     }
-    
+
     public void init(Transition _obj, bool ignoreProcess) {
-    	obj = _obj;
-        if(ignoreProcess == true) return;
-    	if(obj != null) Framework.setProcess(this);
-        
+        obj = _obj;
+        if (ignoreProcess == true) {
+            return;
+        }
+        if (obj != null) {
+            Framework.setProcess(this);
+        }
+
         SceneObject so = (SceneObject) obj.getNativeObject();
-        for(int i=0; i < so.getElementCount(); i++) {
+        for (int i = 0; i < so.getElementCount(); i++) {
             SceneObjectElement soe = so.getElementAt(i);
-            if(soe.getName().startsWith(prefix) == true) {
+            if (soe.getName().startsWith(prefix) == true) {
                 growthElements.addElement(soe);
             }
         }
     }
-    
-	public Growth(String _prefix, float _division, bool _isOffsetStartPoint) {
+
+    public Growth(String _prefix, float _division, bool _isOffsetStartPoint) {
         super();
         division = _division;
         isOffsetStartPoint = _isOffsetStartPoint;
         prefix = _prefix;
-        
+
         growthElements = new Vector();
-	}
+    }
 }

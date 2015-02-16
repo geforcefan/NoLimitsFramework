@@ -3,11 +3,12 @@ package com.nolimitsframework.scenery;
 import com.nolimitscoaster.*;
 
 public class SceneryObjectInstance {
-	public String name;
-	public SceneObject obj;
-	
-	public SceneryObjectInstance(String _name, SceneObject _obj) {
-		name = _name;
-		obj = _obj;
-	}
+
+    public String name;
+    public SceneObject obj;
+
+    public SceneryObjectInstance(String _name, SceneObject _obj) {
+        name = _name;
+        obj = _obj;
+    }
 }

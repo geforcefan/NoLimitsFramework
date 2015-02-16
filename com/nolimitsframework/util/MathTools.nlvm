@@ -1,81 +1,82 @@
 package com.nolimitsframework.util;
+
 import nlvm.math3d.*;
 
 public class MathTools {
+
     static public Vector3f cross(Vector3f a, Vector3f b) {
-    	return new Vector3f(a.y*b.z - a.z*b.y,
-                    	a.z*b.x - a.x*b.z,
-                    	a.x*b.y - a.y*b.x);
+        return new Vector3f(a.y * b.z - a.z * b.y,
+                a.z * b.x - a.x * b.z,
+                a.x * b.y - a.y * b.x);
     }
-    
+
     static public float angle(Vector3f a, Vector3f b) {
-    	Vector3f n1 = new Vector3f(a.x, a.y, a.z);
-    	n1.normalize();
-    	Vector3f n2 = new Vector3f(b.x, b.y, b.z);
-    	n2.normalize();
-    	return (float)(Math.acos((double)MathTools.dot(n1, n2))/0.01745329252f);
+        Vector3f n1 = new Vector3f(a.x, a.y, a.z);
+        n1.normalize();
+        Vector3f n2 = new Vector3f(b.x, b.y, b.z);
+        n2.normalize();
+        return (float) (Math.acos((double) MathTools.dot(n1, n2)) / 0.01745329252f);
     }
-    
+
     static public float dot(Vector3f a, Vector3f b) {
-    	return a.x * b.x + a.y * b.y + a.z * b.z;
+        return a.x * b.x + a.y * b.y + a.z * b.z;
     }
-    
+
     static public Matrix4x4f initMatrix(float a1, float a2, float a3, float a4,
-    									float b1, float b2, float b3, float b4,
-    									float c1, float c2, float c3, float c4,
-    									float d1, float d2, float d3, float d4) {
-    	Matrix4x4f m = new Matrix4x4f();
-    	m.setElemAt(0, 0, a1);
-    	m.setElemAt(1, 0, a2);
-    	m.setElemAt(2, 0, a3);
-    	m.setElemAt(3, 0, a4);
-    	
-    	m.setElemAt(0, 1, b1);
-    	m.setElemAt(1, 1, b2);
-    	m.setElemAt(2, 1, b3);
-    	m.setElemAt(3, 1, b4);
-    	
-    	m.setElemAt(0, 2, c1);
-    	m.setElemAt(1, 2, c2);
-    	m.setElemAt(2, 2, c3);
-    	m.setElemAt(3, 2, c4);
-    	
-    	m.setElemAt(0, 3, d1);
-    	m.setElemAt(1, 3, d2);
-    	m.setElemAt(2, 3, d3);
-    	m.setElemAt(3, 3, d4);
-    	
-    	return m;
+            float b1, float b2, float b3, float b4,
+            float c1, float c2, float c3, float c4,
+            float d1, float d2, float d3, float d4) {
+        Matrix4x4f m = new Matrix4x4f();
+        m.setElemAt(0, 0, a1);
+        m.setElemAt(1, 0, a2);
+        m.setElemAt(2, 0, a3);
+        m.setElemAt(3, 0, a4);
+
+        m.setElemAt(0, 1, b1);
+        m.setElemAt(1, 1, b2);
+        m.setElemAt(2, 1, b3);
+        m.setElemAt(3, 1, b4);
+
+        m.setElemAt(0, 2, c1);
+        m.setElemAt(1, 2, c2);
+        m.setElemAt(2, 2, c3);
+        m.setElemAt(3, 2, c4);
+
+        m.setElemAt(0, 3, d1);
+        m.setElemAt(1, 3, d2);
+        m.setElemAt(2, 3, d3);
+        m.setElemAt(3, 3, d4);
+
+        return m;
     }
-    
+
     static public void rotate(Matrix4x4f m, float angle, float x, float y, float z) {
-    	float c = (float)Math.cos((double)angle);
-    	float s = (float)Math.sin((double)angle);
-    	
-    	Matrix4x4f r = MathTools.initMatrix(x*x*(1.0f-c) + c, x*y*(1.0f-c)-z*s, x*z*(1.0f-c)+y*s, 0.0f,
-    										x*y*(1.0f-c)+z*s, y*y*(1.0f-c)+c,   y*z*(1.0f-c)-x*s, 0.0f,
-    										x*z*(1.0f-c)-y*s, y*z*(1.0f-c)+x*s,	z*z *(1.0f-c)+c,  0.0f,
-    										0.0f,             0.0f,             0.0f,             1.0f);
-    	m.multRight(r);
+        float c = (float) Math.cos((double) angle);
+        float s = (float) Math.sin((double) angle);
+
+        Matrix4x4f r = MathTools.initMatrix(x * x * (1.0f - c) + c, x * y * (1.0f - c) - z * s, x * z * (1.0f - c) + y * s, 0.0f,
+                x * y * (1.0f - c) + z * s, y * y * (1.0f - c) + c, y * z * (1.0f - c) - x * s, 0.0f,
+                x * z * (1.0f - c) - y * s, y * z * (1.0f - c) + x * s, z * z * (1.0f - c) + c, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f);
+        m.multRight(r);
     }
-    
+
     static public Matrix4x4f perspective(float fov, float aspect, float nearDist, float farDist) {
-    	bool leftHanded = true;
-    
-    	Matrix4x4f m = new Matrix4x4f();
-    	m.initIdentity();
+        bool leftHanded = true;
 
-    	float frustumDepth = farDist - nearDist;
-    	float oneOverDepth = 1.0f / frustumDepth;
+        Matrix4x4f m = new Matrix4x4f();
+        m.initIdentity();
 
-    	
-    	m.setElemAt(1,1, 1.0f / (float)Math.tan((double)(0.5f * fov)));
-    	m.setElemAt(0,0, (leftHanded == true ? 1.0f : -1.0f ) * m.elemAt(1,1) / aspect);
-    	m.setElemAt(2,2, farDist * oneOverDepth);
-    	m.setElemAt(3,2, (-farDist * nearDist) * oneOverDepth);
-    	m.setElemAt(2,3, 1.0f);
-    	m.setElemAt(3,3, 0.0f);
-    
-    	return m;
+        float frustumDepth = farDist - nearDist;
+        float oneOverDepth = 1.0f / frustumDepth;
+
+        m.setElemAt(1, 1, 1.0f / (float) Math.tan((double) (0.5f * fov)));
+        m.setElemAt(0, 0, (leftHanded == true ? 1.0f : -1.0f) * m.elemAt(1, 1) / aspect);
+        m.setElemAt(2, 2, farDist * oneOverDepth);
+        m.setElemAt(3, 2, (-farDist * nearDist) * oneOverDepth);
+        m.setElemAt(2, 3, 1.0f);
+        m.setElemAt(3, 3, 0.0f);
+
+        return m;
     }
 }

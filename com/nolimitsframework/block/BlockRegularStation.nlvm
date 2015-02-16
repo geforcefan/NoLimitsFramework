@@ -1,15 +1,17 @@
 package com.nolimitsframework.block;
+
 import nlvm.lang.String;
 
 public class BlockRegularStation extends Block {
+
     private int lastState = 0;
     private int currentState = 0;
     private com.nolimitscoaster.Block nextNativeBlock = null;
-    
+
     public BlockRegularStation(String _name) {
         name = _name;
     }
-    
+
     private void stateInStation(float tick) {
         if (nativeBlock.getSection().isStationWaitingForClearBlock()) {
             if (nextNativeBlock.getState() == Block.STATE_BLOCK_FREE) {
@@ -35,13 +37,13 @@ public class BlockRegularStation extends Block {
             }
         }
     }
-    
+
     private void stateWaitForAdvance(float tick) {
         if ((mngr.mode != BlockManager.MANUAL_BLOCK_MODE) || !nativeBlock.getSection().isStationWaitingForAdvance() || (nextNativeBlock.getState() != Block.STATE_BLOCK_FREE)) {
             nativeBlock.setState(Block.STATE_BLOCK_IN_STATION);
         }
     }
-    
+
     private void stateLeaving(float tick) {
         if (nativeBlock.getNumberOfTrainsOnBlock() != 0) {
             nativeBlock.getSection().setBrakesOff();
@@ -51,12 +53,12 @@ public class BlockRegularStation extends Block {
             nativeBlock.setState(Block.STATE_BLOCK_FREE);
         }
     }
-    
+
     private void stateFree(float tick) {
         nativeBlock.getSection().setTransportsOff();
         nativeBlock.getSection().setBrakesOn();
     }
-    
+
     private void stateApproaching(float tick) {
         if (nativeBlock.getSection().isTrainOnSection()) {
             nativeBlock.getSection().setStationEntering();
@@ -66,21 +68,37 @@ public class BlockRegularStation extends Block {
             nativeBlock.getSection().setTransportsOff();
         }
     }
-    
+
     public void proceed(float tick) {
-        if(nextBlock == null) return;
-        if(nextNativeBlock == null) nextNativeBlock = nextBlock.getNativeBlock();
-        
+        if (nextBlock == null) {
+            return;
+        }
+        if (nextNativeBlock == null) {
+            nextNativeBlock = nextBlock.getNativeBlock();
+        }
+
         currentState = nativeBlock.getState();
-        
-        if(currentState != lastState) stateChanged(currentState);
-        
-        if(currentState == Block.STATE_BLOCK_IN_STATION) stateInStation(tick);
-        if(currentState == Block.STATE_BLOCK_WAIT_FOR_ADVANCE) stateWaitForAdvance(tick);
-        if(currentState == Block.STATE_BLOCK_LEAVING) stateLeaving(tick);
-        if(currentState == Block.STATE_BLOCK_FREE) stateFree(tick);
-        if(currentState == Block.STATE_BLOCK_APPROACHING) stateApproaching(tick);
-        
+
+        if (currentState != lastState) {
+            stateChanged(currentState);
+        }
+
+        if (currentState == Block.STATE_BLOCK_IN_STATION) {
+            stateInStation(tick);
+        }
+        if (currentState == Block.STATE_BLOCK_WAIT_FOR_ADVANCE) {
+            stateWaitForAdvance(tick);
+        }
+        if (currentState == Block.STATE_BLOCK_LEAVING) {
+            stateLeaving(tick);
+        }
+        if (currentState == Block.STATE_BLOCK_FREE) {
+            stateFree(tick);
+        }
+        if (currentState == Block.STATE_BLOCK_APPROACHING) {
+            stateApproaching(tick);
+        }
+
         lastState = currentState;
     }
 }
