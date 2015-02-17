@@ -3,6 +3,7 @@ package com.nolimitsframework.animation;
 import com.nolimitsframework.transition.*;
 import com.nolimitsframework.scenery.*;
 import com.nolimitsframework.trigger.*;
+import com.nolimitsframework.constraints.*;
 import com.nolimitsframework.*;
 
 import nlvm.math3d.*;
@@ -49,6 +50,14 @@ public class Animation extends Triggerable implements Process {
         }
     }
 
+    public void attachConstraint(Constraint constraint, bool ignoreProcess) {
+        obj.attachConstraint(constraint. ignoreProcess);
+    }
+    
+    public void attachConstraint(Constraint constraint) {
+        obj.attachConstraint(constraint. ignoreProcess, false);
+    }
+    
     private Vector splitString(char split, String input) {
         Vector matches = new Vector();
         matches.addElement(new StringBuilder());
