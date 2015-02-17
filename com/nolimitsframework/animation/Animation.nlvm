@@ -49,6 +49,14 @@ public class Animation extends Triggerable implements Process {
             Framework.setProcess(this);
         }
     }
+    
+    public Animation(Transition object) {
+        obj = object;
+        
+        if (obj != null) {
+            Framework.setProcess(this);
+        }
+    }
 
     public void attachConstraint(Constraint constraint, bool ignoreProcess) {
         obj.attachConstraint(constraint. ignoreProcess);
