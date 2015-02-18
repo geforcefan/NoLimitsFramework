@@ -206,4 +206,8 @@ public class Animation extends Triggerable implements Process {
         }
         isRunnning = true;
     }
+    
+    public Transition getObject() {
+        return obj;
+    }
 }
