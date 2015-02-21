@@ -18,9 +18,13 @@ public class LookAt extends Constraint implements Process {
     private Transition lookatObj = null;
     private Vector3f lookatPos = new Vector3f(0.0f, 0.0f, 0.0f);
 
-    public void onChange() {
+    public String getName() {
+        return "LookAt";
+    }
+    
+    public void onChange(Transition _obj) {
         Vector3f pos2 = lookatPos;
-
+        
         if (lookatObj != null) {
             pos2 = new Vector3f(lookatObj.getProperty(PROPERTY_POSITION_X),
                     lookatObj.getProperty(PROPERTY_POSITION_Y),
@@ -32,9 +36,9 @@ public class LookAt extends Constraint implements Process {
                 obj.getProperty(PROPERTY_POSITION_Z));
 
         Vector3f normal = new Vector3f();
-        normal.x = pos2.x - pos.x;
-        normal.y = pos2.y - pos.y;
-        normal.z = pos2.z - pos.z;
+        normal.x = pos.x - pos2.x;
+        normal.y = pos.y - pos2.y;
+        normal.z = pos.z - pos2.z;
         normal.normalize();
 
         Vector3f up = new Vector3f(0.0f, 1.0f, 0.0f);
@@ -74,7 +78,7 @@ public class LookAt extends Constraint implements Process {
                     _lookatObj.getProperty(PROPERTY_POSITION_Z));
         } else {
             lookatObj = _lookatObj;
-            lookatObj.addConstraint(this);
+            lookatObj.attachConstraint(this);
         }
     }
 
