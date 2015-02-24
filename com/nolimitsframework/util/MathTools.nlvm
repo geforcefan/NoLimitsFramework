@@ -61,6 +61,29 @@ public class MathTools {
         m.multRight(r);
     }
 
+    static public Matrix4x4f lookAt(Vector3f eye, Vector3f target, Vector3f up) {
+        Vector3f eyeTargetDiff = eye.dup();
+        eyeTargetDiff.sub(target);
+        eyeTargetDiff.normalize();
+                
+        Vector3f zaxis = eyeTargetDiff;
+        
+        Vector3f crossUpZAxis = cross(up, zaxis);
+        crossUpZAxis.normalize();
+        
+        Vector3f xaxis = crossUpZAxis;
+        Vector3f yaxis = cross(zaxis, xaxis);
+        
+        Matrix4x4f orientation = initMatrix(
+            xaxis.x, yaxis.x, zaxis.x, eye.x ,
+            xaxis.y, yaxis.y, zaxis.y, eye.y ,
+            xaxis.z, yaxis.z, zaxis.z, eye.z ,
+            0,       0,       0,       1
+        );
+        
+        return orientation;
+    }
+    
     static public Matrix4x4f perspective(float fov, float aspect, float nearDist, float farDist) {
         bool leftHanded = true;
 

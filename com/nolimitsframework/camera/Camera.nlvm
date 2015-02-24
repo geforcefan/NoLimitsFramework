@@ -3,6 +3,7 @@ package com.nolimitsframework.camera;
 import com.nolimitscoaster.*;
 import com.nolimitsframework.*;
 import com.nolimitsframework.transition.*;
+import com.nolimitsframework.util.*;
 import nlvm.math3d.*;
 
 public class Camera extends Transition implements Process {
@@ -23,14 +24,23 @@ public class Camera extends Transition implements Process {
 
     private ExternalRideView view = null;
 
+    public String getIdentifier() {
+        return "Camera";
+    }
+    
     public Camera(String _name) {
         super();
         name = _name;
         view = Framework.getSimulator().createExternalRideView();
         view.setLabel(name);
-        view.setEnterWarpPoint(new Vector3f(0.0f, 1.0f, 0.0f), 10.0f);
+        view.setEnterWarpPoint(new Vector3f(0.0f, 2.0f, 0.0f), 10.0f);
 
         Framework.setProcess(this);
+        
+        System.out.println(this.toString());
+        
+        matrix = MathTools.lookAt(new Vector3f(4.0f, 8.0f, 5.0f), new Vector3f(31.48f, 38.7009f, -18.87f), new Vector3f(0.0f, 1.0f, 0.0f));
+        
         calculate();
     }
 
@@ -42,4 +52,5 @@ public class Camera extends Transition implements Process {
         matrix = m;
         calculate();
     }
+    
 }

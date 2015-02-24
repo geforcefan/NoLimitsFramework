@@ -20,6 +20,10 @@ public class Transition implements Process {
     private float startTime = 0.0f;
     protected Vector constraints = new Vector();
 
+    public String getIdentifier() {
+        return "Transition";
+    }
+    
     public Transition() {
         changeProperties = new Vector();
         initProperties = new Vector();
