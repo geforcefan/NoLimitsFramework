@@ -1,9 +1,7 @@
 package com.nolimitsframework.trigger;
 
-public class Triggerable {
-    public void start() {
-    }
+interface Triggerable {
+    abstract public void start();
     
-    public void start(String label) {
-    }
+    abstract public void start(String label);
 }

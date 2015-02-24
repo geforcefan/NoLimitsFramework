@@ -3,9 +3,7 @@ package com.nolimitsframework.camera;
 import com.nolimitscoaster.*;
 import com.nolimitsframework.*;
 import com.nolimitsframework.transition.*;
-import com.nolimitsframework.util.*;
 import nlvm.math3d.*;
-import nlvm.util.*;
 
 public class Camera extends Transition implements Process {
 

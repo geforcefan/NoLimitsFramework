@@ -148,6 +148,7 @@ public class Transition implements Process {
             for (int i = 0; i < changeProperties.size(); i++) {
                 TransitionProperty tp = (TransitionProperty) changeProperties.elementAt(i);
                 setProperty(tp.parameter, tp.value);
+                callConstraintChanges();
             }
             stop();
             return;
@@ -157,6 +158,7 @@ public class Transition implements Process {
             TransitionProperty tp = (TransitionProperty) changeProperties.elementAt(i);
             TransitionProperty itp = (TransitionProperty) initProperties.elementAt(i);
             setProperty(tp.parameter, (float) easing.getValue((double) elapsedTime, (double) itp.value, (double) tp.value - (double) itp.value, (double) animationDuration));
+            callConstraintChanges();
         }
 
     }

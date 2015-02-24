@@ -1,0 +1,109 @@
+package com.nolimitsframework.sound;
+
+import com.nolimitscoaster.*;
+import com.nolimitsframework.*;
+import com.nolimitsframework.trigger.*;
+import com.nolimitsframework.transition.*;
+import nlvm.math3d.*;
+
+public class Sound extends Transition implements Process, Triggerable {
+
+    static final public int PROPERTY_POSITION = 0;
+    static final public int PROPERTY_POSITION_X = 10;
+    static final public int PROPERTY_POSITION_Y = 11;
+    static final public int PROPERTY_POSITION_Z = 12;
+
+    static final public int PROPERTY_GAIN = 3;
+
+    private static String soundFile = "";
+    private StaticSound sound;
+
+    private Vector3f position;
+    private float gain;
+
+    private float fadeTime = 2.0f;
+
+    public Sound(String _soundFile) {
+        super();
+        soundFile = _soundFile;
+        sound = StaticSound.loadFromFile(soundFile, StaticSound.E_ENVMODE_LOCAL);
+
+        position = new Vector3f(0.0f, 0.0f, 0.0f);
+        gain = 1.0f;
+
+        if (sound != null) {
+            sound.setPosition(position);
+            sound.setGain(gain);
+        }
+
+        Framework.setProcess(this);
+    }
+
+    public StaticSound getNativeObject() {
+        return sound;
+    }
+
+    public void setFadeTime(float time) {
+        fadeTime = time;
+    }
+
+    public float getFadeTime(float time) {
+        return fadeTime;
+    }
+
+    public void start() {
+        start("play");
+    }
+
+    public void start(String label) {
+        if (label.equals("play")) {
+            sound.play();
+        } else if (label.equals("playLoop")) {
+            sound.playLoop();
+        } else if (label.equals("stop")) {
+            sound.stop();
+        } else if (label.equals("stopFaded")) {
+            sound.stopFaded(fadeTime);
+        }
+    }
+
+    public float getProperty(int parameter) {
+        if (parameter == PROPERTY_POSITION_X) {
+            return position.x;
+        } else if (parameter == PROPERTY_POSITION_Y) {
+            return position.y;
+        } else if (parameter == PROPERTY_POSITION_Z) {
+            return position.z;
+        } else if (parameter == PROPERTY_GAIN) {
+            return gain;
+        }
+        return 0.0f;
+    }
+
+    public void setProperty(int parameter, float value) {
+        if (parameter == PROPERTY_POSITION_X) {
+            position.x = value;
+            sound.setPosition(position);
+        } else if (parameter == PROPERTY_POSITION_Y) {
+            position.y = value;
+            sound.setPosition(position);
+        } else if (parameter == PROPERTY_POSITION_Z) {
+            position.z = value;
+            sound.setPosition(position);
+        } else if (parameter == PROPERTY_GAIN) {
+            gain = value;
+            sound.setGain(gain);
+        }
+    }
+
+    public void setMatrix(Matrix4x4f m) {
+        position = m.getTrans();
+        sound.setPosition(position);
+    }
+
+    public Matrix4x4f getMatrix() {
+        Matrix4x4f m = new Matrix4x4f();
+        m.initTrans(position);
+        return m;
+    }
+}

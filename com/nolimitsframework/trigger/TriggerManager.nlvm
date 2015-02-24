@@ -46,8 +46,8 @@ public class TriggerManager {
         if (trigger == null) {
             System.err.println("Your trigger '" + triggerNameOnCoaster + "' is not in coaster '" + coaster + "' found.");
 
+        } else {
+            trigger.addTrackTriggerListener(new TriggerListener(obj, label));
         }
-
-        trigger.addTrackTriggerListener(new TriggerListener(obj, label));
     }
 }

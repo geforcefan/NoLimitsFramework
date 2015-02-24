@@ -9,7 +9,7 @@ import com.nolimitsframework.*;
 import nlvm.math3d.*;
 import nlvm.util.*;
 
-public class Animation extends Triggerable implements Process {
+public class Animation implements Process, Triggerable {
 
     private Transition obj = null;
     private Vector animationItems = new Vector();
@@ -22,35 +22,44 @@ public class Animation extends Triggerable implements Process {
 
     private float stopTime = 0.0f;
     private float startTime = 0.0f;
+    
+    static public Animation createFromObject(Transition object) {
+        Animation anim = new Animation("");
+        anim.setObject(object);
+        
+        return anim;
+    }
 
     public Animation(String query) {
         String InitType = "";
         String InitArguments = "";
 
-        Vector queryPieces = splitString(':', query);
-        for (int i = 0; i < queryPieces.size(); i++) {
-            StringBuilder a = (StringBuilder) queryPieces.elementAt(i);
-            String queryPiece = trim(a.toString());
+        if(query.length() != 0) {
+            Vector queryPieces = splitString(':', query);
+            for (int i = 0; i < queryPieces.size(); i++) {
+                StringBuilder a = (StringBuilder) queryPieces.elementAt(i);
+                String queryPiece = trim(a.toString());
 
-            if (i == 0) {
-                InitType = queryPiece;
-            } else {
-                InitArguments = queryPiece;
+                if (i == 0) {
+                    InitType = queryPiece;
+                } else {
+                    InitArguments = queryPiece;
+                }
             }
-        }
 
-        if (InitType.equals("Scenery")) {
-            obj = new SceneryObject(InitArguments);
-        } else {
-            System.err.println("Animation query syntax error for expression '" + query + "'");
-        }
+            if (InitType.equals("Scenery")) {
+                obj = new SceneryObject(InitArguments);
+            } else {
+                System.err.println("Animation query syntax error for expression '" + query + "'");
+            }
 
-        if (obj != null) {
-            Framework.setProcess(this);
+            if (obj != null) {
+                Framework.setProcess(this);
+            }
         }
     }
     
-    public Animation(Transition object) {
+    public void setObject(Transition object) {
         obj = object;
         
         if (obj != null) {
@@ -59,11 +68,11 @@ public class Animation extends Triggerable implements Process {
     }
 
     public void attachConstraint(Constraint constraint, bool ignoreProcess) {
-        obj.attachConstraint(constraint. ignoreProcess);
+        obj.attachConstraint(constraint, ignoreProcess);
     }
     
     public void attachConstraint(Constraint constraint) {
-        obj.attachConstraint(constraint. ignoreProcess, false);
+        obj.attachConstraint(constraint, false);
     }
     
     private Vector splitString(char split, String input) {
