@@ -26,7 +26,7 @@ public class Sound extends Transition implements Process, Triggerable {
     public Sound(String _soundFile) {
         super();
         soundFile = _soundFile;
-        sound = StaticSound.loadFromFile(soundFile);
+        sound = StaticSound.loadFromFile(soundFile, 0);
         sound.setEnvironmentMode(StaticSound.E_ENVMODE_LOCAL);
         
         position = new Vector3f(0.0f, 0.0f, 0.0f);
@@ -40,7 +40,7 @@ public class Sound extends Transition implements Process, Triggerable {
         Framework.setProcess(this);
     }
 
-    public StaticSound getNativeObject() {
+    public Object getNativeObject() {
         return sound;
     }
 
