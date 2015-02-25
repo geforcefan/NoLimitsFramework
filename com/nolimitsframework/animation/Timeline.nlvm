@@ -3,7 +3,7 @@ package com.nolimitsframework.animation;
 import com.nolimitsframework.trigger.*;
 import nlvm.util.*;
 
-public class Timeline extends Triggerable {
+public class Timeline implements Triggerable {
 
     private Vector animations = new Vector();
 
