@@ -226,7 +226,6 @@ public class BlockSwitchBrake extends Block {
         if (currentState == Block.STATE_BLOCK_WAITING) {
             stateWaiting(tick);
         }
+        lastState = currentState;
     }
-
-    lastState  = currentState;
 }
