@@ -113,21 +113,19 @@ public class BlockSwitchBrake extends Block {
     private void stateBeforeTrigger(float tick) {
         nativeBlock.getSection().setBrakesTrim();
 
-        if (backwardMode == false) {
-            nativeBlock.getSection().setTransportsStandardFwdDependingOnBrake();
-        } else {
+	if(backwardMode) {
             nativeBlock.getSection().setTransportsStandardBwdDependingOnBrake();
-        }
-	if(backwardMode){
-		if (nativeBlock.getSection().isTrainBeforeBrakeTrigger()) {
-			nativeBlock.setState(Block.STATE_BLOCK_BEHIND_TRIGGER);
-		}	
-	}else{
-		if (nativeBlock.getSection().isTrainBehindBrakeTrigger()) {
-			nativeBlock.setState(Block.STATE_BLOCK_BEHIND_TRIGGER);
-		}	
+            
+            if (nativeBlock.getSection().isTrainBeforeBrakeTrigger()) {
+                nativeBlock.setState(Block.STATE_BLOCK_BEHIND_TRIGGER);
+            }
+	} else {
+            nativeBlock.getSection().setTransportsStandardFwdDependingOnBrake();
+            
+            if (nativeBlock.getSection().isTrainBehindBrakeTrigger()) {
+                nativeBlock.setState(Block.STATE_BLOCK_BEHIND_TRIGGER);
+            }
 	}
-    }
     }
 
     private void stateWaitForClear(float tick) {
